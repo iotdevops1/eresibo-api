@@ -10,7 +10,7 @@ use App\Http\Controllers\Api\Auth\LogoutController;
 
 Route::prefix('auth')->group(function () {
 
-    Route::post('/login', [LoginController::class, 'login']);
+    Route::post('/login', LoginController::class);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', MeController::class);
