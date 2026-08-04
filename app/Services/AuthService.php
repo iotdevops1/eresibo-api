@@ -87,4 +87,13 @@ class AuthService
             'user'         => $user,
         ];
     }
+
+    public function logout($user): void
+    {
+        $user->update([
+            'is_login' => false,
+        ]);
+        $user->currentAccessToken()?->delete();
+    }
+
 }
