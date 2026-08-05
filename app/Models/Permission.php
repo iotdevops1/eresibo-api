@@ -6,14 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-class UserRole extends Model
+class Permission extends Model
 {
     use HasUuids, SoftDeletes;
 
-    protected $table = 'user_roles';
-
     protected $fillable = [
         'uuid',
+        'module',
         'code',
         'name',
         'description',
@@ -33,18 +32,13 @@ class UserRole extends Model
         return ['uuid'];
     }
 
-    public function users()
-    {
-        return $this->hasMany(User::class, 'role_id');
-    }
-
-    public function permissions()
+    public function roles()
     {
         return $this->belongsToMany(
-            Permission::class,
+            UserRole::class,
             'user_role_permissions',
-            'role_id',
-            'permission_id'
+            'permission_id',
+            'role_id'
         );
     }
 }
