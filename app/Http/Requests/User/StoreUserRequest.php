@@ -16,11 +16,11 @@ class StoreUserRequest extends FormRequest
     {
         return [
 
-            'role_id' => [
+            'role' => [
                 'required',
-                'exists:user_roles,id'
+                'exists:user_roles,code',
             ],
-
+            
             'name' => [
                 'required',
                 'string',
