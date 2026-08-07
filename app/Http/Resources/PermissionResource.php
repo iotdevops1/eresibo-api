@@ -10,6 +10,7 @@ class PermissionResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'uuid'   => $this->uuid,
             'module' => $this->module,
             'code'   => $this->code,
             'name'   => $this->name,

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Auth\MeController;
 use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\RoleController;
+use App\Http\Controllers\Api\Admin\PermissionController;
 
 
 Route::prefix('auth')->group(function () {
@@ -32,5 +33,9 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,ADMIN',])-
     Route::get('/roles/{uuid}',    [RoleController::class, 'show'])->middleware('permission:roles.view');
     Route::put('/roles/{uuid}',    [RoleController::class, 'update'])->middleware('permission:roles.update');
     Route::delete('/roles/{uuid}', [RoleController::class, 'destroy'])->middleware('permission:roles.delete');
-   
+
+    // Permission Management
+    Route::get('/permissions',              [PermissionController::class, 'index'])->middleware('permission:roles.view');
+    Route::put('/roles/{uuid}/permissions', [RoleController::class, 'updatePermissions'])->middleware('permission:roles.update');
+
 });

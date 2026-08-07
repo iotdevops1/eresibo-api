@@ -8,6 +8,7 @@ use App\Http\Resources\RoleCollection;
 use App\Http\Resources\RoleResource;
 use App\Http\Requests\Role\StoreRoleRequest;
 use App\Http\Requests\Role\UpdateRoleRequest;
+use App\Http\Requests\Role\UpdateRolePermissionsRequest;
 
 class RoleController extends BaseApiController
 {
@@ -61,7 +62,7 @@ class RoleController extends BaseApiController
             'Role updated successfully.'
         );
     }
-    
+
     public function destroy(string $uuid)
     {
         $this->roleService->destroy($uuid);
@@ -69,6 +70,19 @@ class RoleController extends BaseApiController
         return $this->success(
             null,
             'Role deleted successfully.'
+        );
+    }
+
+    public function updatePermissions(string $uuid, UpdateRolePermissionsRequest $request)
+    {
+        $role = $this->roleService->updatePermissions(
+            $uuid,
+            $request->validated()['permissions']
+        );
+
+        return $this->success(
+            new RoleResource($role),
+            'Role permissions updated successfully.'
         );
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services\Role;
 
 use App\Models\UserRole;
 use App\Repositories\Role\RoleRepository;
+use App\Models\Permission;
 use Illuminate\Support\Facades\DB;
 
 class RoleService
@@ -79,5 +80,28 @@ class RoleService
         }
 
         $this->roleRepository->delete($role);
+    }
+
+    public function updatePermissions(string $uuid, array $permissionCodes): UserRole {
+
+        return DB::transaction(function () use ($uuid, $permissionCodes) {
+            $role = $this->roleRepository
+                ->findByUuid($uuid);
+
+            if (! $role) {
+                abort(404, 'Role not found.');
+            }
+
+            $permissionIds = Permission::query()
+                ->whereIn('code', $permissionCodes)
+                ->pluck('id')
+                ->toArray();
+
+            $role->permissions()->sync(
+                $permissionIds
+            );
+
+            return $role->load('permissions');
+        });
     }
 }
