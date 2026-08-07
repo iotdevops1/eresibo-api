@@ -18,7 +18,10 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'mobile' => $this->mobile,
-            'status' => $this->status,
+            'status' => [
+                'id'   => $this->status,
+                'name' => $this->status_name,
+            ],
             'is_login' => $this->is_login,
             'last_login_at' => $this->last_login_at?->toIso8601String(),
             'role' => new UserRoleResource($this->whenLoaded('role')),

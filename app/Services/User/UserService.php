@@ -109,6 +109,13 @@ class UserService
                 }
             }
 
+            $this->userRepository->update(
+                $user,
+                [
+                    'status' => User::STATUS_DELETED,
+                ]
+            );
+
             $this->userRepository->delete($user);
         });
     }

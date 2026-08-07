@@ -11,6 +11,12 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
+    public const STATUS_ACTIVE    = 1;
+    public const STATUS_INACTIVE  = 2;
+    public const STATUS_SUSPENDED = 3;
+    public const STATUS_LOCKED    = 4;
+    public const STATUS_DELETED   = 5;
+
     use HasApiTokens, HasFactory, Notifiable, HasUuids, SoftDeletes;
 
     protected $fillable = [
@@ -56,5 +62,17 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(UserRole::class, 'role_id');
+    }
+
+    public function getStatusNameAttribute(): string
+    {
+        return match ($this->status) {
+            self::STATUS_ACTIVE    => 'ACTIVE',
+            self::STATUS_INACTIVE  => 'INACTIVE',
+            self::STATUS_SUSPENDED => 'SUSPENDED',
+            self::STATUS_LOCKED    => 'LOCKED',
+            self::STATUS_DELETED   => 'DELETED',
+            default                => 'UNKNOWN',
+        };
     }
 }

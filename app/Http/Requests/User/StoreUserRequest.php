@@ -49,10 +49,10 @@ class StoreUserRequest extends FormRequest
 
             'status' => [ 'required',
                 Rule::in([
-                    'ACTIVE',
-                    'INACTIVE',
-                    'SUSPENDED',
-                    'LOCKED'
+                    User::STATUS_ACTIVE,
+                    User::STATUS_INACTIVE,
+                    User::STATUS_SUSPENDED,
+                    User::STATUS_LOCKED,
                 ])
             ],
 

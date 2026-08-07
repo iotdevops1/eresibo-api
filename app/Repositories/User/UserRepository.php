@@ -18,6 +18,7 @@ class UserRepository extends BaseRepository
     {
         $query = $this->model
             ->newQuery()
+            ->withTrashed()
             ->with('role');
 
         $filter = new UserFilter($filters);
@@ -33,6 +34,7 @@ class UserRepository extends BaseRepository
     {
         return $this->model
             ->newQuery()
+            ->withTrashed()
             ->with('role')
             ->where('uuid', $uuid)
             ->first();
