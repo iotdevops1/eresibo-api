@@ -28,7 +28,7 @@ class AuthService
         | Check if account is locked
         |--------------------------------------------------------------------------
         */
-        if ($user->is_lock || $user->status === 'LOCKED') {
+        if ($user->is_lock || $user->status === User::STATUS_LOCKED) {
             throw ValidationException::withMessages([
                 'email' => ['Your account has been locked. Please contact the administrator.'],
             ]);
@@ -45,7 +45,7 @@ class AuthService
 
             if ($user->login_attempt >= 5) {
                 $user->update([
-                    'status'  => 'LOCKED',
+                    'status'  => User::STATUS_LOCKED,
                     'is_lock' => true,
                 ]);
             }
@@ -60,7 +60,7 @@ class AuthService
         | Check account status
         |--------------------------------------------------------------------------
         */
-        if ($user->status !== 'ACTIVE') {
+        if ($user->status !== User::STATUS_ACTIVE) {
             throw ValidationException::withMessages([
                 'email' => ['Your account is inactive.'],
             ]);

@@ -27,14 +27,14 @@ class UserService
 
             $role = UserRole::where(
                 'code',
-                $data['role_code']
+                $data['role']
             )->firstOrFail();
 
             $user = $this->userRepository->create([
                 'role_id'       => $role->id,
                 'name'          => $data['name'],
                 'email'         => strtolower($data['email']),
-                'mobile'        => $data['mobile'],
+                'mobile'        => $data['mobile'] ?? null,
                 'password'      => Hash::make($data['password']),
                 'status'        => $data['status'],
                 'is_login'      => false,

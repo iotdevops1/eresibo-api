@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\PermissionController;
+use App\Http\Controllers\Api\Admin\ModuleController;
 
 
 Route::prefix('auth')->group(function () {
@@ -16,6 +17,7 @@ Route::prefix('auth')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me',      MeController::class);
         Route::post('/logout', LogoutController::class);
+        Route::get('/sidebar', [ModuleController::class, 'sidebar'])->middleware('permission:sidebar.view');
     }); 
 });
 
@@ -37,5 +39,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,ADMIN',])-
     // Permission Management
     Route::get('/permissions',              [PermissionController::class, 'index'])->middleware('permission:roles.view');
     Route::put('/roles/{uuid}/permissions', [RoleController::class, 'updatePermissions'])->middleware('permission:roles.update');
+
+   
 
 });

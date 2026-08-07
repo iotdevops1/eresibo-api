@@ -23,10 +23,11 @@ class UserFilterRequest extends FormRequest
 
             'status' => ['nullable',
                 Rule::in([
-                    'ACTIVE',
-                    'INACTIVE',
-                    'SUSPENDED',
-                    'LOCKED',
+                    User::STATUS_ACTIVE,
+                    User::STATUS_INACTIVE,
+                    User::STATUS_SUSPENDED,
+                    User::STATUS_LOCKED,
+                    User::STATUS_DELETED,
                 ]),
             ],
 
