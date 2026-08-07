@@ -4,24 +4,21 @@ namespace App\Services\User;
 
 use App\Models\User;
 use App\Models\UserRole;
-use App\Filters\UserFilter;
+use App\Repositories\User\UserRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class UserService
 {
+    public function __construct(
+        protected UserRepository $userRepository
+    ) {
+    }
+
     public function index(array $filters)
     {
-        $query = User::query()
-            ->with('role');
-
-        $filter = new UserFilter($filters);
-
-        return $filter
-            ->apply($query)
-            ->paginate(
-                $filter->perPage()
-            );
+        return $this->userRepository->paginate($filters);
     }
 
     public function store(array $data): User
@@ -33,7 +30,7 @@ class UserService
                 $data['role_code']
             )->firstOrFail();
 
-            $user = User::create([
+            $user = $this->userRepository->create([
                 'role_id'       => $role->id,
                 'name'          => $data['name'],
                 'email'         => strtolower($data['email']),
@@ -51,9 +48,7 @@ class UserService
 
     public function show(string $uuid): User
     {
-        $user = User::with('role')
-            ->where('uuid', $uuid)
-            ->first();
+        $user = $this->userRepository->findByUuid($uuid);
 
         if (! $user) {
             abort(404, 'User not found.');
@@ -62,8 +57,7 @@ class UserService
         return $user;
     }
 
-    public function update(User $user, array $data): User
-    {
+    public function update(User $user, array $data ): User {
         return DB::transaction(function () use ($user, $data) {
 
             $role = UserRole::where(
@@ -71,15 +65,18 @@ class UserService
                 $data['role_code']
             )->firstOrFail();
 
-            $user->update([
-                'role_id' => $role->id,
-                'name'    => $data['name'],
-                'email'   => strtolower($data['email']),
-                'mobile'  => $data['mobile'],
-                'status'  => $data['status'],
-            ]);
+            $updatedUser = $this->userRepository->update(
+                $user,
+                [
+                    'role_id' => $role->id,
+                    'name'    => $data['name'],
+                    'email'   => strtolower($data['email']),
+                    'mobile'  => $data['mobile'],
+                    'status'  => $data['status'],
+                ]
+            );
 
-            return $user->fresh()->load('role');
+            return $updatedUser->load('role');
         });
     }
 
@@ -87,7 +84,6 @@ class UserService
     {
         DB::transaction(function () use ($user) {
 
-        
             if ($user->id === auth()->id()) {
                 throw ValidationException::withMessages([
                     'user' => [
@@ -96,16 +92,15 @@ class UserService
                 ]);
             }
 
-           
             if ($user->role?->code === 'SUPER_ADMIN') {
 
-                $remainingSuperAdmins = User::query()
+                $superAdminCount = User::query()
                     ->whereHas('role', function ($query) {
                         $query->where('code', 'SUPER_ADMIN');
                     })
                     ->count();
 
-                if ($remainingSuperAdmins <= 1) {
+                if ($superAdminCount <= 1) {
                     throw ValidationException::withMessages([
                         'user' => [
                             'At least one SUPER_ADMIN must remain in the system.'
@@ -114,7 +109,7 @@ class UserService
                 }
             }
 
-            $user->delete();
+            $this->userRepository->delete($user);
         });
     }
 }
