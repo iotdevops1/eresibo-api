@@ -27,6 +27,10 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,ADMIN',])-
     Route::delete('/users/{user:uuid}', [UserController::class, 'destroy'])->middleware('permission:users.delete');
 
     // Role Management
-    Route::get('/roles',        [RoleController::class, 'index'])->middleware('permission:roles.view');
-    Route::get('/roles/{uuid}', [RoleController::class, 'show'])->middleware('permission:roles.view');
+    Route::get('/roles',           [RoleController::class, 'index'])->middleware('permission:roles.view');
+    Route::post('/roles',          [RoleController::class, 'store'])->middleware('permission:roles.create');
+    Route::get('/roles/{uuid}',    [RoleController::class, 'show'])->middleware('permission:roles.view');
+    Route::put('/roles/{uuid}',    [RoleController::class, 'update'])->middleware('permission:roles.update');
+    Route::delete('/roles/{uuid}', [RoleController::class, 'destroy'])->middleware('permission:roles.delete');
+   
 });

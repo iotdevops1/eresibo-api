@@ -4,6 +4,7 @@ namespace App\Services\Role;
 
 use App\Models\UserRole;
 use App\Repositories\Role\RoleRepository;
+use Illuminate\Support\Facades\DB;
 
 class RoleService
 {
@@ -27,5 +28,56 @@ class RoleService
         }
 
         return $role;
+    }
+
+    public function store(array $data): UserRole
+    {
+        return DB::transaction(function () use ($data) {
+
+            return $this->roleRepository->create([
+                'code'        => strtoupper($data['code']),
+                'name'        => $data['name'],
+                'description' => $data['description'] ?? null,
+                'active'      => $data['active'],
+            ]);
+        });
+    }
+
+    public function update(string $uuid, array $data): UserRole
+    {
+        $role = $this->roleRepository
+            ->findByUuid($uuid);
+
+        if (! $role) {
+            abort(404, 'Role not found.');
+        }
+
+        return DB::transaction(function () use ($role, $data) {
+            return $this->roleRepository->update($role, [
+                'code'        => strtoupper($data['code']),
+                'name'        => $data['name'],
+                'description' => $data['description'] ?? null,
+                'active'      => $data['active'],
+            ]);
+        });
+    }
+
+    public function destroy(string $uuid): void
+    {
+        $role = $this->roleRepository->findByUuid($uuid);
+
+        if (! $role) {
+            abort(404, 'Role not found.');
+        }
+
+        if (in_array($role->code, ['SUPER_ADMIN', 'ADMIN', 'CUSTOMER'])) {
+            abort(422, 'System roles cannot be deleted.');
+        }
+
+        if ($role->users()->exists()) {
+            abort(422, 'Role is currently assigned to users.');
+        }
+
+        $this->roleRepository->delete($role);
     }
 }

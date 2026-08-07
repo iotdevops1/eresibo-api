@@ -6,6 +6,8 @@ use App\Services\Role\RoleService;
 use App\Http\Controllers\BaseApiController;
 use App\Http\Resources\RoleCollection;
 use App\Http\Resources\RoleResource;
+use App\Http\Requests\Role\StoreRoleRequest;
+use App\Http\Requests\Role\UpdateRoleRequest;
 
 class RoleController extends BaseApiController
 {
@@ -31,6 +33,42 @@ class RoleController extends BaseApiController
                 $this->roleService->show($uuid)
             ),
             'Role retrieved successfully.'
+        );
+    }
+
+    public function store(StoreRoleRequest $request)
+    {
+        $role = $this->roleService->store(
+            $request->validated()
+        );
+
+        return $this->success(
+            new RoleResource($role),
+            'Role created successfully.',
+            201
+        );
+    }
+
+    public function update(UpdateRoleRequest $request, string $uuid)
+    {
+        $role = $this->roleService->update(
+            $uuid,
+            $request->validated()
+        );
+
+        return $this->success(
+            new RoleResource($role),
+            'Role updated successfully.'
+        );
+    }
+    
+    public function destroy(string $uuid)
+    {
+        $this->roleService->destroy($uuid);
+
+        return $this->success(
+            null,
+            'Role deleted successfully.'
         );
     }
 }

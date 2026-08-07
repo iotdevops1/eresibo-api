@@ -4,6 +4,7 @@ namespace App\Repositories\Role;
 
 use App\Models\UserRole;
 use App\Repositories\BaseRepository;
+use Illuminate\Support\Facades\DB;
 
 class RoleRepository extends BaseRepository
 {
@@ -36,5 +37,10 @@ class RoleRepository extends BaseRepository
             ->with('permissions')
             ->where('uuid', $uuid)
             ->first();
+    }
+    
+    public function create(array $data): UserRole
+    {
+        return $this->model->create($data);
     }
 }
