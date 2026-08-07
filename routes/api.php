@@ -20,7 +20,7 @@ Route::prefix('auth')->group(function () {
 Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,ADMIN',])->group(function () {
     Route::get('/users',           [UserController::class, 'index'])->middleware('permission:users.view');
     Route::post('/users',          [UserController::class, 'store'])->middleware('permission:users.create');
-    Route::get('/users/{user}',    [UserController::class, 'show'])->middleware('permission:users.view');
-    Route::put('/users/{user}',    [UserController::class, 'update'])->middleware('permission:users.update');
-    Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('permission:users.delete');
+    Route::get('/users/{uuid}', [UserController::class, 'show'])->middleware('permission:users.view');
+    Route::put('/users/{user:uuid}',    [UserController::class, 'update'])->middleware('permission:users.update');
+    Route::delete('/users/{user:uuid}', [UserController::class, 'destroy'])->middleware('permission:users.delete');
 });
