@@ -22,7 +22,7 @@ class SuperAdminSeeder extends Seeder
                 'name'             => 'Super Administrator',
                 'mobile'           => '09171234567',
                 'password'         => Hash::make('Admin@123'),
-                'status'           => 'ACTIVE',
+                'status'           => 1, //Active
                 'is_login'         => false,
                 'login_attempt'    => 0,
                 'is_lock'          => false,

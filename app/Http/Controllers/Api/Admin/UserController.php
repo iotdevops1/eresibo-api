@@ -12,6 +12,7 @@ use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
 use App\Services\User\UserService;
 
+
 class UserController extends BaseApiController
 {
    public function __construct(

@@ -116,7 +116,7 @@ class UserService
                 ]
             );
 
-            $this->userRepository->delete($user);
+            // $this->userRepository->delete($user);
         });
     }
 }

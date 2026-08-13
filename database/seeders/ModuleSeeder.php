@@ -170,5 +170,17 @@ class ModuleSeeder extends Seeder
                 'active' => true,
             ]
         );
+        Module::updateOrCreate(
+            ['code' => 'CUSTOMERS'],
+            [
+                'name' => 'Customers',
+                'icon' => 'users',
+                'route' => '/admin/customers',
+                'permission_code' => 'customers.view',
+                'parent_id' => $administration->id,
+                'sort_order' => 5,
+                'active' => true,
+            ]
+        );
     }
 }
