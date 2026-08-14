@@ -70,7 +70,7 @@ class ModuleSeeder extends Seeder
             [
                 'name' => 'My Cases',
                 'icon' => 'briefcase',
-                'route' => '/cases',
+                'route' => '/my-cases',
                 'sort_order' => 5,
                 'active' => true,
             ]
@@ -179,6 +179,18 @@ class ModuleSeeder extends Seeder
                 'permission_code' => 'customers.view',
                 'parent_id' => $administration->id,
                 'sort_order' => 5,
+                'active' => true,
+            ]
+        );
+         Module::updateOrCreate(
+            ['code' => 'MERCHANT'],
+            [
+                'name' => 'Merchant',
+                'icon' => 'users',
+                'route' => '/admin/merchant',
+                'permission_code' => 'merchants.view',
+                'parent_id' => $administration->id,
+                'sort_order' => 6,
                 'active' => true,
             ]
         );

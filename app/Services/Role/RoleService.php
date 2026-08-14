@@ -79,12 +79,9 @@ class RoleService
             abort(422, 'Role is currently assigned to users.');
         }
 
-        $this->userRepository->update(
-                $user,
-            [
-                'status' => User::STATUS_DELETED,
-            ]
-        );
+        $this->roleRepository->update($role, [
+            'active' => false,
+        ]);
     }
 
     public function updatePermissions(string $uuid, array $permissionCodes): UserRole {

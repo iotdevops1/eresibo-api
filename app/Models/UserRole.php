@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class UserRole extends Model
 {
+    public const STATUS_ACTIVE    = 1;
+    public const STATUS_INACTIVE  = 2;
+    public const STATUS_SUSPENDED = 3;
+    public const STATUS_LOCKED    = 4;
+    public const STATUS_DELETED   = 5;
+
     use HasUuids, SoftDeletes;
 
     protected $table = 'user_roles';
@@ -18,6 +24,7 @@ class UserRole extends Model
         'name',
         'description',
         'active',
+        'status',
     ];
 
     protected $hidden = [

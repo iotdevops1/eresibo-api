@@ -67,6 +67,15 @@ class PermissionSeeder extends Seeder
 
         /*
         |--------------------------------------------------------------------------
+        | Merchant
+        |--------------------------------------------------------------------------
+        */
+        ['module' => 'MECHANT', 'code' => 'merchants.view',   'name' => 'View merchant'],
+        ['module' => 'MECHANT', 'code' => 'merchants.create', 'name' => 'Update merchant'],
+        ['module' => 'MECHANT', 'code' => 'merchants.update', 'name' => 'Update merchant'],
+        ['module' => 'MECHANT', 'code' => 'merchants.delete', 'name' => 'Update merchant'],
+        /*
+        |--------------------------------------------------------------------------
         | Transactions
         |--------------------------------------------------------------------------
         */
@@ -109,7 +118,7 @@ class PermissionSeeder extends Seeder
         | System
         |--------------------------------------------------------------------------
         */
-       ['module' => 'SYSTEM', 'code' => 'permissions.view', 'name' => 'View Permissions'],
+        ['module' => 'SYSTEM', 'code' => 'permissions.view', 'name' => 'View Permissions'],
         ['module' => 'SYSTEM', 'code' => 'modules.view', 'name' => 'View Modules'],
         ['module' => 'SYSTEM', 'code' => 'sidebar.view', 'name' => 'View Sidebar'],
     ];

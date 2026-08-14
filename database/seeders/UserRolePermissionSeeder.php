@@ -24,11 +24,19 @@ class UserRolePermissionSeeder extends Seeder
             'customers.view',
             'customers.create',
             'customers.update',
+            'merchants.view',
+            'merchants.create',
+            'merchants.update',
             'transactions.view',
             'document_vault.view',
             'payslips.view',
             'reports.view',
             'settings.view',
+            'permissions.view',
+            'modules.view',
+            'sidebar.view',
+            'dashboard.view',
+            'roles.view',
         ])->pluck('id')->toArray();
 
         $admin->permissions()->sync($adminPermissions);
@@ -36,6 +44,8 @@ class UserRolePermissionSeeder extends Seeder
         $customer = UserRole::where('code', 'CUSTOMER')->first();
 
         $customerPermissions = Permission::whereIn('code', [
+            'dashboard.view',
+            'sidebar.view',
             'transactions.view',
             'document_vault.view',
             'document_vault.download',
