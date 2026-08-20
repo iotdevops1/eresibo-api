@@ -121,6 +121,38 @@ class PermissionSeeder extends Seeder
         ['module' => 'SYSTEM', 'code' => 'permissions.view', 'name' => 'View Permissions'],
         ['module' => 'SYSTEM', 'code' => 'modules.view', 'name' => 'View Modules'],
         ['module' => 'SYSTEM', 'code' => 'sidebar.view', 'name' => 'View Sidebar'],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Employer
+        |--------------------------------------------------------------------------
+        */
+
+        ['module' => 'EMPLOYER', 'code' => 'insights.view', 'name' => 'View Insights'],
+
+        ['module' => 'EMPLOYER', 'code' => 'payroll_batches.view', 'name' => 'View Payroll Batches'],
+        ['module' => 'EMPLOYER', 'code' => 'payroll_batches.create', 'name' => 'Create Payroll Batch'],
+        ['module' => 'EMPLOYER', 'code' => 'payroll_batches.update', 'name' => 'Update Payroll Batch'],
+
+        ['module' => 'EMPLOYER', 'code' => 'disbursements.view', 'name' => 'View Disbursements'],
+
+        ['module' => 'EMPLOYER', 'code' => 'fund_holds.view', 'name' => 'View Fund Holds'],
+        ['module' => 'EMPLOYER', 'code' => 'fund_holds.create', 'name' => 'Create Fund Hold'],
+
+        ['module' => 'EMPLOYER', 'code' => 'payslips.view', 'name' => 'View Payslips'],
+        ['module' => 'EMPLOYER', 'code' => 'payslips.create', 'name' => 'Create Payslip'],
+
+        ['module' => 'EMPLOYER', 'code' => 'team.view', 'name' => 'View Team Directory'],
+        ['module' => 'EMPLOYER', 'code' => 'team.create', 'name' => 'Add Team Member'],
+        ['module' => 'EMPLOYER', 'code' => 'team.update', 'name' => 'Update Team Member'],
+
+        ['module' => 'EMPLOYER', 'code' => 'disputes.view', 'name' => 'View Disputes'],
+        ['module' => 'EMPLOYER', 'code' => 'disputes.create', 'name' => 'Create Dispute'],
+
+        ['module' => 'EMPLOYER', 'code' => 'reports.view', 'name' => 'View Reports'],
+
+        ['module' => 'EMPLOYER', 'code' => 'audit_logs.view', 'name' => 'View Audit Logs'],
+
     ];
 
         foreach ($permissions as $permission) {

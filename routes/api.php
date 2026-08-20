@@ -43,3 +43,24 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,ADMIN',])-
    
 
 });
+
+Route::prefix('employer')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,EMPLOYER',])->group(function () {
+    // Dashboard
+    Route::get('/dashboard',           [EmployerDashboardController::class, 'index'])->middleware('permission:dashboard.view');
+    Route::get('/insights',            [EmployerDashboardController::class, 'index'])->middleware('permission:dashboard.view');
+ 
+
+    // Role Management
+    Route::get('/roles',           [RoleController::class, 'index'])->middleware('permission:roles.view');
+    Route::post('/roles',          [RoleController::class, 'store'])->middleware('permission:roles.create');
+    Route::get('/roles/{uuid}',    [RoleController::class, 'show'])->middleware('permission:roles.view');
+    Route::put('/roles/{uuid}',    [RoleController::class, 'update'])->middleware('permission:roles.update');
+    Route::delete('/roles/{uuid}', [RoleController::class, 'destroy'])->middleware('permission:roles.delete');
+
+    // Permission Management
+    Route::get('/permissions',              [PermissionController::class, 'index'])->middleware('permission:roles.view');
+    Route::put('/roles/{uuid}/permissions', [RoleController::class, 'updatePermissions'])->middleware('permission:roles.update');
+
+   
+
+});
