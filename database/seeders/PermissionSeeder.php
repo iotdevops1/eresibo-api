@@ -145,6 +145,7 @@ class PermissionSeeder extends Seeder
         ['module' => 'EMPLOYER', 'code' => 'team.view', 'name' => 'View Team Directory'],
         ['module' => 'EMPLOYER', 'code' => 'team.create', 'name' => 'Add Team Member'],
         ['module' => 'EMPLOYER', 'code' => 'team.update', 'name' => 'Update Team Member'],
+        ['module' => 'EMPLOYER', 'code' => 'team.delete', 'name' => 'Delete Team Member'],
 
         ['module' => 'EMPLOYER', 'code' => 'disputes.view', 'name' => 'View Disputes'],
         ['module' => 'EMPLOYER', 'code' => 'disputes.create', 'name' => 'Create Dispute'],

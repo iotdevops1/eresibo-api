@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Employee;
 
 class User extends Authenticatable
 {
@@ -74,5 +75,13 @@ class User extends Authenticatable
             self::STATUS_DELETED   => 'DELETED',
             default                => 'UNKNOWN',
         };
+    }
+
+    public function employees()
+    {
+        return $this->hasMany(
+            Employee::class,
+            'employer_id'
+        );
     }
 }

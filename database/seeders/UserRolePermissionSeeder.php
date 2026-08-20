@@ -124,7 +124,8 @@ class UserRolePermissionSeeder extends Seeder
                 'team.view',
                 'team.create',
                 'team.update',
-
+                'team.delete',
+                
                 'disputes.view',
                 'disputes.create',
 

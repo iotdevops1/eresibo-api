@@ -12,6 +12,10 @@ use App\Http\Controllers\Api\Admin\PermissionController;
 use App\Http\Controllers\Api\Admin\ModuleController;
 
 
+// Employer
+use App\Http\Controllers\Api\Employer\TeamController;
+
+
 Route::prefix('auth')->group(function () {
     Route::post('/login', LoginController::class);
     Route::middleware('auth:sanctum')->group(function () {
@@ -44,22 +48,16 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,ADMIN',])-
 
 });
 
-Route::prefix('employer')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,EMPLOYER',])->group(function () {
-    // Dashboard
-    Route::get('/dashboard',           [EmployerDashboardController::class, 'index'])->middleware('permission:dashboard.view');
-    Route::get('/insights',            [EmployerDashboardController::class, 'index'])->middleware('permission:dashboard.view');
+Route::prefix('employer')->middleware(['auth:sanctum', 'role:EMPLOYER',])->group(function () {
+
+    // Team
+    Route::get('/team', [TeamController::class, 'index'])->middleware('permission:team.view');
+    Route::post('/team',          [TeamController::class, 'store'])->middleware('permission:team.create');
+    Route::get('/team/{uuid}',    [TeamController::class, 'show'])->middleware('permission:team.view');
+    Route::put('/team/{uuid}',    [TeamController::class, 'update'])->middleware('permission:team.update');
+    Route::patch('/team/{uuid}',  [TeamController::class, 'update'])->middleware('permission:team.update');
+    Route::delete('/team/{uuid}', [TeamController::class, 'destroy'])->middleware('permission:team.delete');
  
-
-    // Role Management
-    Route::get('/roles',           [RoleController::class, 'index'])->middleware('permission:roles.view');
-    Route::post('/roles',          [RoleController::class, 'store'])->middleware('permission:roles.create');
-    Route::get('/roles/{uuid}',    [RoleController::class, 'show'])->middleware('permission:roles.view');
-    Route::put('/roles/{uuid}',    [RoleController::class, 'update'])->middleware('permission:roles.update');
-    Route::delete('/roles/{uuid}', [RoleController::class, 'destroy'])->middleware('permission:roles.delete');
-
-    // Permission Management
-    Route::get('/permissions',              [PermissionController::class, 'index'])->middleware('permission:roles.view');
-    Route::put('/roles/{uuid}/permissions', [RoleController::class, 'updatePermissions'])->middleware('permission:roles.update');
 
    
 
