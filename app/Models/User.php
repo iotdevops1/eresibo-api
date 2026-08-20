@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Employee;
+use App\Models\PayrollBatch;
+use App\Models\PayrollBatchItem;
 
 class User extends Authenticatable
 {
@@ -81,6 +83,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(
             Employee::class,
+            'employer_id'
+        );
+    }
+
+    public function payrollBatches()
+    {
+        return $this->hasMany(
+            PayrollBatch::class,
             'employer_id'
         );
     }

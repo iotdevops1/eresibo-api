@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\Admin\ModuleController;
 
 // Employer
 use App\Http\Controllers\Api\Employer\TeamController;
-
+use App\Http\Controllers\Api\Employer\PayrollBatchController;
 
 Route::prefix('auth')->group(function () {
     Route::post('/login', LoginController::class);
@@ -50,8 +50,12 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,ADMIN',])-
 
 Route::prefix('employer')->middleware(['auth:sanctum', 'role:EMPLOYER',])->group(function () {
 
-    // Team
-    Route::get('/team', [TeamController::class, 'index'])->middleware('permission:team.view');
+    /*
+    |--------------------------------------------------------------------------
+    | Team Directory
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/team',           [TeamController::class, 'index'])->middleware('permission:team.view');
     Route::post('/team',          [TeamController::class, 'store'])->middleware('permission:team.create');
     Route::get('/team/{uuid}',    [TeamController::class, 'show'])->middleware('permission:team.view');
     Route::put('/team/{uuid}',    [TeamController::class, 'update'])->middleware('permission:team.update');
@@ -59,6 +63,17 @@ Route::prefix('employer')->middleware(['auth:sanctum', 'role:EMPLOYER',])->group
     Route::delete('/team/{uuid}', [TeamController::class, 'destroy'])->middleware('permission:team.delete');
  
 
+    /*
+    |--------------------------------------------------------------------------
+    | Payroll Batches
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/payroll-batches',                [PayrollBatchController::class, 'index'])->middleware('permission:payroll_batches.view');
+    Route::post('/payroll-batches',               [PayrollBatchController::class, 'store'])->middleware('permission:payroll_batches.create');
+    Route::get('/payroll-batches/{uuid}',         [PayrollBatchController::class, 'show'])->middleware('permission:payroll_batches.view');
+    Route::patch('/payroll-batches/{uuid}',       [PayrollBatchController::class, 'update'])->middleware('permission:payroll_batches.update');
+    Route::post('/payroll-batches/{uuid}/submit', [PayrollBatchController::class, 'submit'])->middleware('permission:payroll_batches.submit');
    
 
 });

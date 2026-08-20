@@ -112,7 +112,8 @@ class UserRolePermissionSeeder extends Seeder
                 'payroll_batches.view',
                 'payroll_batches.create',
                 'payroll_batches.update',
-
+                'payroll_batches.submit',
+                
                 'disbursements.view',
 
                 'fund_holds.view',

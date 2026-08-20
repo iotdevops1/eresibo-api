@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Employee;
+use App\Models\PayrollBatch;
+use App\Models\PayrollBatchItem;
 
 class Employee extends Model
 {
@@ -59,6 +62,13 @@ class Employee extends Model
                 $this->middle_name,
                 $this->last_name,
             ]))
+        );
+    }
+    public function payrollBatchItems()
+    {
+        return $this->hasMany(
+            PayrollBatchItem::class,
+            'employee_id'
         );
     }
 }

@@ -130,9 +130,11 @@ class PermissionSeeder extends Seeder
 
         ['module' => 'EMPLOYER', 'code' => 'insights.view', 'name' => 'View Insights'],
 
-        ['module' => 'EMPLOYER', 'code' => 'payroll_batches.view', 'name' => 'View Payroll Batches'],
+        ['module' => 'EMPLOYER', 'code' => 'payroll_batches.view',   'name' => 'View Payroll Batches'],
         ['module' => 'EMPLOYER', 'code' => 'payroll_batches.create', 'name' => 'Create Payroll Batch'],
         ['module' => 'EMPLOYER', 'code' => 'payroll_batches.update', 'name' => 'Update Payroll Batch'],
+        ['module' => 'EMPLOYER', 'code' => 'payroll_batches.delete', 'name' => 'Delete Payroll Batch'],
+        ['module' => 'EMPLOYER', 'code' => 'payroll_batches.submit', 'name' => 'Submit Payroll Batch'],
 
         ['module' => 'EMPLOYER', 'code' => 'disbursements.view', 'name' => 'View Disbursements'],
 
