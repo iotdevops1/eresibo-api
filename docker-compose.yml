@@ -1,4 +1,4 @@
-version: "3.9"
+name: eresibo-prod
 
 services:
 
@@ -7,12 +7,15 @@ services:
       context: .
       dockerfile: Dockerfile
 
-    container_name: eresibo_api_app
+    restart: unless-stopped
 
     working_dir: /var/www
 
     volumes:
       - ./:/var/www
+
+    depends_on:
+      - mysql
 
     networks:
       - eresibo_network
@@ -20,10 +23,10 @@ services:
   nginx:
     image: nginx:alpine
 
-    container_name: eresibo_api_nginx
+    restart: unless-stopped
 
     ports:
-      - "8085:80"
+      - "127.0.0.1:8085:80"
 
     volumes:
       - ./:/var/www
@@ -38,18 +41,16 @@ services:
   mysql:
     image: mysql:8.4
 
-    container_name: eresibo_mysql
-
     restart: unless-stopped
 
     ports:
       - "3309:3306"
 
     environment:
-      MYSQL_DATABASE: eresibo_db
-      MYSQL_ROOT_PASSWORD: admin
-      MYSQL_USER: eresibo_db
-      MYSQL_PASSWORD: admin
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
 
     volumes:
       - mysql_data:/var/lib/mysql
@@ -58,9 +59,8 @@ services:
       - eresibo_network
 
 volumes:
-
   mysql_data:
 
 networks:
-
   eresibo_network:
+    driver: bridge
