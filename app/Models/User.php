@@ -11,6 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\Employee;
 use App\Models\PayrollBatch;
 use App\Models\PayrollBatchItem;
+use App\Models\Merchant;
 
 class User extends Authenticatable
 {
@@ -92,6 +93,14 @@ class User extends Authenticatable
         return $this->hasMany(
             PayrollBatch::class,
             'employer_id'
+        );
+    }
+
+    public function merchant()
+    {
+        return $this->belongsTo(
+            Merchant::class,
+            'merchant_id'
         );
     }
 }

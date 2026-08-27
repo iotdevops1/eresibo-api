@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\PermissionController;
 use App\Http\Controllers\Api\Admin\ModuleController;
+use App\Http\Controllers\Api\Admin\MerchantController;
 
 
 // Employer
@@ -26,6 +27,14 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,ADMIN',])->group(function () {
+
+    // Merchant
+    Route::get('/merchants',[MerchantController::class, 'index'])->middleware('permission:management.view');
+    Route::post('/merchants',[MerchantController::class, 'store'])->middleware('permission:management.create');
+    Route::get('/merchants/{uuid}',[MerchantController::class, 'show'])->middleware('permission:management.view');
+    Route::patch('/merchants/{uuid}',[MerchantController::class, 'update'])->middleware('permission:management.update');
+    Route::delete('/merchants/{uuid}',[MerchantController::class, 'destroy'])->middleware('permission:management.delete');
+
     // User Management
     Route::get('/users',                [UserController::class, 'index'])->middleware('permission:users.view');
     Route::post('/users',               [UserController::class, 'store'])->middleware('permission:users.create');

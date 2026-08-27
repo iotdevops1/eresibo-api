@@ -67,13 +67,24 @@ class PermissionSeeder extends Seeder
 
         /*
         |--------------------------------------------------------------------------
-        | Merchant
+        | Management
         |--------------------------------------------------------------------------
         */
-        ['module' => 'MECHANT', 'code' => 'merchants.view',   'name' => 'View merchant'],
-        ['module' => 'MECHANT', 'code' => 'merchants.create', 'name' => 'Update merchant'],
-        ['module' => 'MECHANT', 'code' => 'merchants.update', 'name' => 'Update merchant'],
-        ['module' => 'MECHANT', 'code' => 'merchants.delete', 'name' => 'Update merchant'],
+        ['module' => 'MANAGEMENT', 'code' => 'management.view',   'name' => 'View merchant'],
+        ['module' => 'MANAGEMENT', 'code' => 'management.create', 'name' => 'Create merchant'],
+        ['module' => 'MANAGEMENT', 'code' => 'management.update', 'name' => 'Update merchant'],
+        ['module' => 'MANAGEMENT', 'code' => 'management.delete', 'name' => 'Delete merchant'],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prefunding
+        |--------------------------------------------------------------------------
+        */
+        ['module' => 'PREFUNDING', 'code' => 'prefunding.view',   'name' => 'View prefunding'],
+        ['module' => 'PREFUNDING', 'code' => 'prefunding.create', 'name' => 'Create prefunding'],
+        ['module' => 'PREFUNDING', 'code' => 'prefunding.update', 'name' => 'Update prefunding'],
+        ['module' => 'PREFUNDING', 'code' => 'prefunding.delete', 'name' => 'Delete prefunding'],
+
         /*
         |--------------------------------------------------------------------------
         | Transactions

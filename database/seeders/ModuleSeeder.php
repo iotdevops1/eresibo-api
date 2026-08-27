@@ -184,15 +184,51 @@ class ModuleSeeder extends Seeder
                 'active' => true,
             ]
         );
-         Module::updateOrCreate(
-            ['code' => 'MERCHANT'],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Merchants
+        |--------------------------------------------------------------------------
+        */
+
+        $merchants = Module::updateOrCreate(
+            ['code' => 'MERCHANTS'],
             [
                 'name' => 'Merchants',
+                'icon' => 'store',
+                'route' => null,
+                'permission_code' => null,
+                'parent_id' => null,
+                'sort_order' => 100,
+                'is_menu' => true,
+                'active' => true,
+            ]
+        );
+
+        Module::updateOrCreate(
+            ['code' => 'MANAGEMENT'],
+            [
+                'name' => 'Management',
                 'icon' => 'users',
-                'route' => '/admin/merchant',
-                'permission_code' => 'merchants.view',
-                'parent_id' => $administration->id,
-                'sort_order' => 6,
+                'route' => '/admin/management',
+                'permission_code' => 'management.view',
+                'parent_id' => $merchants->id,
+                'sort_order' => 1,
+                'is_menu' => true,
+                'active' => true,
+            ]
+        );
+
+        Module::updateOrCreate(
+            ['code' => 'PREFUNDING'],
+            [
+                'name' => 'Prefunding',
+                'icon' => 'wallet-cards',
+                'route' => '/admin/prefunding',
+                'permission_code' => 'prefunding.view',
+                'parent_id' => $merchants->id,
+                'sort_order' => 2,
+                'is_menu' => true,
                 'active' => true,
             ]
         );
