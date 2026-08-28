@@ -4,6 +4,7 @@ namespace App\Services\Employee;
 
 use App\Models\Employee;
 use App\Repositories\Employee\EmployeeRepository;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class EmployeeService
@@ -13,19 +14,31 @@ class EmployeeService
     ) {
     }
 
-    public function index(int $employerId, array $filters) {
+    /*
+    |--------------------------------------------------------------------------
+    | List Employees
+    |--------------------------------------------------------------------------
+    */
+
+    public function index(int $merchantId, array $filters = []) {
         return $this->employeeRepository
-        ->paginateByEmployer(
-            $employerId,
-            $filters
-        );
+            ->paginateByMerchant(
+                $merchantId,
+                $filters
+            );
     }
 
-    public function show(string $uuid, int $employerId): Employee {
+    /*
+    |--------------------------------------------------------------------------
+    | Show Employee
+    |--------------------------------------------------------------------------
+    */
+
+    public function show(string $uuid, int $merchantId): Employee {
         $employee = $this->employeeRepository
-            ->findByUuidForEmployer(
+            ->findByUuidForMerchant(
                 $uuid,
-                $employerId
+                $merchantId
             );
 
         if (! $employee) {
@@ -39,27 +52,37 @@ class EmployeeService
         return $employee;
     }
 
-    public function store(
-        int $employerId,
-        array $data
-    ): Employee {
-        $employee = $this->employeeRepository->create([
-            'employer_id'       => $employerId,
-            'employee_no'       => $data['employee_no'],
-            'first_name'        => $data['first_name'],
-            'middle_name'      => $data['middle_name'] ?? null,
-            'last_name'         => $data['last_name'],
-            'email'             => $data['email'] ?? null,
-            'mobile'            => $data['mobile'] ?? null,
-            'position'          => $data['position'] ?? null,
-            'department'        => $data['department'] ?? null,
-            'pusopay_wallet_id' => $data['pusopay_wallet_id'],
-            'status'            => $data['status'],
-            'hired_at'          => $data['hired_at'] ?? null,
-        ]);
+    /*
+    |--------------------------------------------------------------------------
+    | Create Employee
+    |--------------------------------------------------------------------------
+    */
 
-        return $employee;
+    public function store(int $merchantId, array $data): Employee {
+        return DB::transaction(function () use ($merchantId, $data) {
+
+            return $this->employeeRepository->create([
+                'merchant_id'       => $merchantId,
+                'employee_no'       => $data['employee_no'],
+                'first_name'        => $data['first_name'],
+                'middle_name'       => $data['middle_name'] ?? null,
+                'last_name'         => $data['last_name'],
+                'email'             => $data['email'] ?? null,
+                'mobile'            => $data['mobile'] ?? null,
+                'position'          => $data['position'] ?? null,
+                'department'        => $data['department'] ?? null,
+                'pusopay_wallet_id' => $data['pusopay_wallet_id'],
+                'status'            => $data['status'],
+                'hired_at'          => $data['hired_at'] ?? null,
+            ]);
+        });
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update Employee
+    |--------------------------------------------------------------------------
+    */
 
     public function update(Employee $employee, array $data): Employee {
         $this->employeeRepository->update(
@@ -70,15 +93,22 @@ class EmployeeService
         return $employee->refresh();
     }
 
-    public function destroy(Employee $employee): void
-    {
-        $this->employeeRepository->update(
-            $employee,
-            [
-                'status' => Employee::STATUS_INACTIVE,
-            ]
-        );
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Employee
+    |--------------------------------------------------------------------------
+    */
 
-        $this->employeeRepository->delete($employee);
+    public function destroy(Employee $employee): void {
+        DB::transaction(function () use ($employee) {
+            $this->employeeRepository->update($employee, [
+                    'status' => Employee::STATUS_INACTIVE,
+                ]
+            );
+
+            $this->employeeRepository->delete(
+                $employee
+            );
+        });
     }
 }

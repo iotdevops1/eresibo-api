@@ -16,7 +16,11 @@ class MerchantRepository extends BaseRepository
     {
         $query = $this->model
             ->newQuery()
-            ->withCount('employers');
+            ->withCount([
+                'employers',
+                'employees',
+            ]);
+            
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
@@ -41,7 +45,10 @@ class MerchantRepository extends BaseRepository
     {
         return $this->model
             ->newQuery()
-            ->withCount('employers')
+            ->withCount([
+                'employers',
+                'employees',
+            ])
             ->where('uuid', $uuid)
             ->first();
     }

@@ -15,7 +15,7 @@ class Employee extends Model
 
     protected $fillable = [
         'uuid',
-        'employer_id',
+        'merchant_id',
         'employee_no',
         'first_name',
         'middle_name',
@@ -46,14 +46,6 @@ class Employee extends Model
         return ['uuid'];
     }
 
-    public function employer()
-    {
-        return $this->belongsTo(
-            User::class,
-            'employer_id'
-        );
-    }
-
     public function getFullNameAttribute(): string
     {
         return trim(
@@ -64,11 +56,20 @@ class Employee extends Model
             ]))
         );
     }
+
     public function payrollBatchItems()
     {
         return $this->hasMany(
             PayrollBatchItem::class,
             'employee_id'
+        );
+    }
+
+    public function merchant()
+    {
+        return $this->belongsTo(
+            Merchant::class,
+            'merchant_id'
         );
     }
 }

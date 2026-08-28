@@ -11,7 +11,12 @@ class PayrollBatchResource extends JsonResource
     {
         return [
             'uuid' => $this->uuid,
-
+            'merchant' => $this->whenLoaded('merchant',fn () => [
+                    'uuid' => $this->merchant->uuid,
+                    'merchant_code' => $this->merchant->merchant_code,
+                    'business_name' => $this->merchant->business_name,
+                ]
+            ),
             'batch_no' => $this->batch_no,
 
             'description' => $this->description,

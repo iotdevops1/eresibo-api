@@ -12,7 +12,7 @@ class PayrollBatch extends Model
 
     protected $fillable = [
         'uuid',
-        'employer_id',
+        'merchant_id',
         'batch_no',
         'pay_period_start',
         'pay_period_end',
@@ -33,10 +33,13 @@ class PayrollBatch extends Model
         'pay_date' => 'date',
         'submitted_at' => 'datetime',
         'completed_at' => 'datetime',
+
         'total_employees' => 'integer',
+
         'total_gross_amount' => 'decimal:2',
         'total_deduction_amount' => 'decimal:2',
         'total_net_amount' => 'decimal:2',
+
         'status' => 'integer',
     ];
 
@@ -53,11 +56,11 @@ class PayrollBatch extends Model
         return ['uuid'];
     }
 
-    public function employer()
+    public function merchant()
     {
         return $this->belongsTo(
-            User::class,
-            'employer_id'
+            Merchant::class,
+            'merchant_id'
         );
     }
 

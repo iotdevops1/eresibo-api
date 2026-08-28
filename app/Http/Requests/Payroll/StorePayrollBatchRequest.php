@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Payroll;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StorePayrollBatchRequest extends FormRequest
 {
@@ -18,7 +17,7 @@ class StorePayrollBatchRequest extends FormRequest
 
             /*
             |--------------------------------------------------------------------------
-            | Batch
+            | Payroll Batch
             |--------------------------------------------------------------------------
             */
 
@@ -83,21 +82,36 @@ class StorePayrollBatchRequest extends FormRequest
                 'min:0',
                 'decimal:0,2',
             ],
-
         ];
     }
 
     public function messages(): array
     {
         return [
-            'items.required'                    => 'At least one employee is required.',
-            'items.min'                         => 'At least one employee is required.',
-            'items.*.employee_id.required'      => 'Employee is required.',
-            'items.*.employee_id.distinct'      => 'An employee can only appear once in a payroll batch.',
-            'items.*.employee_id.exists'        => 'The selected employee does not exist.',
-            'items.*.gross_amount.required'     => 'Gross amount is required.',
-            'items.*.gross_amount.min'          =>  'Gross amount must be greater than zero.',
-            'items.*.deduction_amount.required' => 'Deduction amount is required.',
+
+            'items.required' =>
+                'At least one employee is required.',
+
+            'items.min' =>
+                'At least one employee is required.',
+
+            'items.*.employee_id.required' =>
+                'Employee is required.',
+
+            'items.*.employee_id.distinct' =>
+                'An employee can only appear once in a payroll batch.',
+
+            'items.*.employee_id.exists' =>
+                'The selected employee does not exist.',
+
+            'items.*.gross_amount.required' =>
+                'Gross amount is required.',
+
+            'items.*.gross_amount.min' =>
+                'Gross amount must be greater than zero.',
+
+            'items.*.deduction_amount.required' =>
+                'Deduction amount is required.',
         ];
     }
 }

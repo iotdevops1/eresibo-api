@@ -12,27 +12,63 @@ class PayrollBatchRepository extends BaseRepository
         $this->model = $model;
     }
 
-    public function paginateByEmployer(int $employerId, array $filters) {
+    public function paginateByMerchant(
+        int $merchantId,
+        array $filters = []
+    ) {
         $query = $this->model
             ->newQuery()
-            ->where('employer_id', $employerId)
+            ->where('merchant_id', $merchantId)
             ->withCount('items')
             ->with([
+                'merchant',
                 'items.employee',
             ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Search
+        |--------------------------------------------------------------------------
+        */
+
         if (!empty($filters['search'])) {
+
             $search = $filters['search'];
 
             $query->where(function ($q) use ($search) {
-                $q->where('batch_no', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+
+                $q->where(
+                    'batch_no',
+                    'like',
+                    "%{$search}%"
+                )
+                ->orWhere(
+                    'description',
+                    'like',
+                    "%{$search}%"
+                );
+
             });
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Status
+        |--------------------------------------------------------------------------
+        */
+
         if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
+            $query->where(
+                'status',
+                $filters['status']
+            );
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Pay Date
+        |--------------------------------------------------------------------------
+        */
 
         if (!empty($filters['pay_date'])) {
             $query->whereDate(
@@ -48,12 +84,16 @@ class PayrollBatchRepository extends BaseRepository
             );
     }
 
-    public function findByUuidForEmployer(string $uuid, int $employerId): ?PayrollBatch {
+    public function findByUuidForMerchant(
+        string $uuid,
+        int $merchantId
+    ): ?PayrollBatch {
         return $this->model
             ->newQuery()
             ->where('uuid', $uuid)
-            ->where('employer_id', $employerId)
+            ->where('merchant_id', $merchantId)
             ->with([
+                'merchant',
                 'items.employee',
             ])
             ->first();

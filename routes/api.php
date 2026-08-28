@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\PermissionController;
 use App\Http\Controllers\Api\Admin\ModuleController;
 use App\Http\Controllers\Api\Admin\MerchantController;
+use App\Http\Controllers\Api\Admin\MerchantEmployerController;
+use App\Http\Controllers\Api\Admin\MerchantEmployeeController;
 
 
 // Employer
@@ -29,11 +31,19 @@ Route::prefix('auth')->group(function () {
 Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,ADMIN',])->group(function () {
 
     // Merchant
-    Route::get('/merchants',[MerchantController::class, 'index'])->middleware('permission:management.view');
-    Route::post('/merchants',[MerchantController::class, 'store'])->middleware('permission:management.create');
-    Route::get('/merchants/{uuid}',[MerchantController::class, 'show'])->middleware('permission:management.view');
-    Route::patch('/merchants/{uuid}',[MerchantController::class, 'update'])->middleware('permission:management.update');
-    Route::delete('/merchants/{uuid}',[MerchantController::class, 'destroy'])->middleware('permission:management.delete');
+    Route::get('/merchants',           [MerchantController::class, 'index'])->middleware('permission:management.view');
+    Route::post('/merchants',          [MerchantController::class, 'store'])->middleware('permission:management.create');
+    Route::get('/merchants/{uuid}',    [MerchantController::class, 'show'])->middleware('permission:management.view');
+    Route::patch('/merchants/{uuid}',  [MerchantController::class, 'update'])->middleware('permission:management.update');
+    Route::delete('/merchants/{uuid}', [MerchantController::class, 'destroy'])->middleware('permission:management.delete');
+
+    Route::get('/merchants/{merchantUuid}/employers',              [MerchantEmployerController::class, 'index'])->middleware('permission:management.view');
+    Route::post('/merchants/{merchantUuid}/employers',             [MerchantEmployerController::class, 'store'])->middleware('permission:management.create');
+    Route::get('/merchants/{merchantUuid}/employers/{userUuid}',   [MerchantEmployerController::class, 'show'])->middleware('permission:management.view');
+    Route::patch('/merchants/{merchantUuid}/employers/{userUuid}', [MerchantEmployerController::class, 'update'])->middleware('permission:management.update');
+    Route::delete('/merchants/{merchantUuid}/employers/{userUuid}',[MerchantEmployerController::class, 'destroy'])->middleware('permission:management.delete');
+
+    Route::get('/merchants/{merchantUuid}/employees', [MerchantEmployeeController::class, 'index'])->middleware('permission:merchants.view');
 
     // User Management
     Route::get('/users',                [UserController::class, 'index'])->middleware('permission:users.view');

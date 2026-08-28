@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\PayrollBatchItemResource;
 
 class PayrollBatchItemResource extends JsonResource
 {
@@ -13,17 +12,41 @@ class PayrollBatchItemResource extends JsonResource
         return [
             'uuid' => $this->uuid,
 
+            /*
+            |--------------------------------------------------------------------------
+            | Employee
+            |--------------------------------------------------------------------------
+            */
+
             'employee' => $this->whenLoaded(
                 'employee',
                 function () {
                     return [
                         'uuid' => $this->employee->uuid,
+
                         'employee_no' => $this->employee->employee_no,
+
                         'name' => $this->employee->full_name,
-                        'pusopay_wallet_id' => $this->employee->pusopay_wallet_id,
+
+                        'email' => $this->employee->email,
+
+                        'mobile' => $this->employee->mobile,
+
+                        'position' => $this->employee->position,
+
+                        'department' => $this->employee->department,
+
+                        'pusopay_wallet_id' =>
+                            $this->employee->pusopay_wallet_id,
                     ];
                 }
             ),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Payroll Amounts
+            |--------------------------------------------------------------------------
+            */
 
             'amounts' => [
                 'gross' => (float) $this->gross_amount,
@@ -31,8 +54,15 @@ class PayrollBatchItemResource extends JsonResource
                 'net' => (float) $this->net_amount,
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | Processing Status
+            |--------------------------------------------------------------------------
+            */
+
             'status' => [
                 'id' => $this->status,
+
                 'name' => match ($this->status) {
                     1 => 'PENDING',
                     2 => 'PROCESSING',
@@ -43,14 +73,33 @@ class PayrollBatchItemResource extends JsonResource
                 },
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | Payslip
+            |--------------------------------------------------------------------------
+            */
+
             'payslip_id' => $this->payslip_id,
+
+            /*
+            |--------------------------------------------------------------------------
+            | Payout
+            |--------------------------------------------------------------------------
+            */
 
             'payout' => [
                 'status' => $this->payout_status,
                 'reference' => $this->payout_reference,
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | Timestamps
+            |--------------------------------------------------------------------------
+            */
+
             'created_at' => $this->created_at?->toISOString(),
+
             'updated_at' => $this->updated_at?->toISOString(),
         ];
     }

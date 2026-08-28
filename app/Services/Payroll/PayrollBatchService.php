@@ -15,19 +15,37 @@ class PayrollBatchService
     ) {
     }
 
-    public function index(int $employerId, array $filters) {
+    /*
+    |--------------------------------------------------------------------------
+    | List
+    |--------------------------------------------------------------------------
+    */
+
+    public function index(
+        int $merchantId,
+        array $filters = []
+    ) {
         return $this->payrollBatchRepository
-            ->paginateByEmployer(
-                $employerId,
+            ->paginateByMerchant(
+                $merchantId,
                 $filters
             );
     }
 
-    public function show(string $uuid, int $employerId): PayrollBatch {
+    /*
+    |--------------------------------------------------------------------------
+    | Show
+    |--------------------------------------------------------------------------
+    */
+
+    public function show(
+        string $uuid,
+        int $merchantId
+    ): PayrollBatch {
         $batch = $this->payrollBatchRepository
-            ->findByUuidForEmployer(
+            ->findByUuidForMerchant(
                 $uuid,
-                $employerId
+                $merchantId
             );
 
         if (! $batch) {
@@ -41,31 +59,71 @@ class PayrollBatchService
         return $batch;
     }
 
-    public function store(int $employerId, array $data): PayrollBatch {
-        return DB::transaction(function () use ($employerId, $data) {
+    /*
+    |--------------------------------------------------------------------------
+    | Create
+    |--------------------------------------------------------------------------
+    */
+
+    public function store(
+        int $merchantId,
+        array $data
+    ): PayrollBatch {
+        return DB::transaction(function () use (
+            $merchantId,
+            $data
+        ) {
+
             /*
             |--------------------------------------------------------------------------
-            | Validate employees belong to employer
+            | Validate Employees Belong To Merchant
             |--------------------------------------------------------------------------
             */
 
-            $employeeIds = collect(
-                $data['items']
-            )->pluck('employee_id')
+            $employeeIds = collect($data['items'])
+                ->pluck('employee_id')
                 ->unique()
                 ->values();
 
             $employees = Employee::query()
-                ->where('employer_id', $employerId)
+                ->where('merchant_id', $merchantId)
                 ->whereIn('id', $employeeIds)
-                ->where('status', Employee::STATUS_ACTIVE)
+                ->where(
+                    'status',
+                    Employee::STATUS_ACTIVE
+                )
                 ->get()
                 ->keyBy('id');
 
-            if ($employees->count() !== $employeeIds->count()) {
+            if (
+                $employees->count()
+                !== $employeeIds->count()
+            ) {
                 throw ValidationException::withMessages([
                     'items' => [
-                        'One or more employees do not belong to this employer or are not active.'
+                        'One or more employees do not belong to this merchant or are not active.'
+                    ],
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Prevent Duplicate Batch Number
+            |--------------------------------------------------------------------------
+            */
+
+            $existingBatch = PayrollBatch::query()
+                ->where('merchant_id', $merchantId)
+                ->where(
+                    'batch_no',
+                    $data['batch_no']
+                )
+                ->exists();
+
+            if ($existingBatch) {
+                throw ValidationException::withMessages([
+                    'batch_no' => [
+                        'The batch number has already been used by this merchant.'
                     ],
                 ]);
             }
@@ -77,22 +135,37 @@ class PayrollBatchService
             */
 
             $batch = $this->payrollBatchRepository->create([
-                'employer_id' => $employerId,
+                'merchant_id' => $merchantId,
+
                 'batch_no' => $data['batch_no'],
-                'pay_period_start' => $data['pay_period_start'],
-                'pay_period_end' => $data['pay_period_end'],
-                'pay_date' => $data['pay_date'],
-                'description' => $data['description'] ?? null,
+
+                'pay_period_start' =>
+                    $data['pay_period_start'],
+
+                'pay_period_end' =>
+                    $data['pay_period_end'],
+
+                'pay_date' =>
+                    $data['pay_date'],
+
+                'description' =>
+                    $data['description'] ?? null,
+
                 'total_employees' => 0,
+
                 'total_gross_amount' => 0,
+
                 'total_deduction_amount' => 0,
+
                 'total_net_amount' => 0,
-                'status' => PayrollBatch::STATUS_DRAFT,
+
+                'status' =>
+                    PayrollBatch::STATUS_DRAFT,
             ]);
 
             /*
             |--------------------------------------------------------------------------
-            | Create Batch Items
+            | Create Items
             |--------------------------------------------------------------------------
             */
 
@@ -103,7 +176,10 @@ class PayrollBatchService
             foreach ($data['items'] as $item) {
 
                 $gross = (float) $item['gross_amount'];
-                $deduction = (float) $item['deduction_amount'];
+
+                $deduction =
+                    (float) $item['deduction_amount'];
+
                 $net = $gross - $deduction;
 
                 if ($net < 0) {
@@ -115,40 +191,72 @@ class PayrollBatchService
                 }
 
                 $batch->items()->create([
-                    'employee_id' => $item['employee_id'],
-                    'gross_amount' => $gross,
-                    'deduction_amount' => $deduction,
-                    'net_amount' => $net,
+                    'employee_id' =>
+                        $item['employee_id'],
+
+                    'gross_amount' =>
+                        $gross,
+
+                    'deduction_amount' =>
+                        $deduction,
+
+                    'net_amount' =>
+                        $net,
+
                     'status' => 1,
-                    'payout_status' => 'NOT_RELEASED',
+
+                    'payout_status' =>
+                        'NOT_RELEASED',
                 ]);
 
                 $totalGross += $gross;
+
                 $totalDeductions += $deduction;
+
                 $totalNet += $net;
             }
 
             /*
             |--------------------------------------------------------------------------
-            | Update Batch Summary
+            | Update Summary
             |--------------------------------------------------------------------------
             */
 
             $batch->update([
-                'total_employees' => count($data['items']),
-                'total_gross_amount' => $totalGross,
-                'total_deduction_amount' => $totalDeductions,
-                'total_net_amount' => $totalNet,
+                'total_employees' =>
+                    count($data['items']),
+
+                'total_gross_amount' =>
+                    $totalGross,
+
+                'total_deduction_amount' =>
+                    $totalDeductions,
+
+                'total_net_amount' =>
+                    $totalNet,
             ]);
 
             return $batch->load([
-                'items.employee'
+                'merchant',
+                'items.employee',
             ]);
         });
     }
 
-    public function update(PayrollBatch $batch, array $data): PayrollBatch {
-        if ($batch->status !== PayrollBatch::STATUS_DRAFT) {
+    /*
+    |--------------------------------------------------------------------------
+    | Update
+    |--------------------------------------------------------------------------
+    */
+
+    public function update(
+        PayrollBatch $batch,
+        array $data
+    ): PayrollBatch {
+        if (
+            $batch->status
+            !== PayrollBatch::STATUS_DRAFT
+        ) {
             throw ValidationException::withMessages([
                 'payroll_batch' => [
                     'Only DRAFT payroll batches can be updated.'
@@ -156,12 +264,10 @@ class PayrollBatchService
             ]);
         }
 
-        return DB::transaction(function () use ($batch, $data) {
-            /*
-            |--------------------------------------------------------------------------
-            | Update Batch Header
-            |--------------------------------------------------------------------------
-            */
+        return DB::transaction(function () use (
+            $batch,
+            $data
+        ) {
 
             $batchData = collect($data)
                 ->only([
@@ -173,18 +279,12 @@ class PayrollBatchService
                 ])
                 ->toArray();
 
-            if (!empty($batchData)) {
+            if (! empty($batchData)) {
                 $this->payrollBatchRepository->update(
                     $batch,
                     $batchData
                 );
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Update Items
-            |--------------------------------------------------------------------------
-            */
 
             if (array_key_exists('items', $data)) {
 
@@ -194,25 +294,31 @@ class PayrollBatchService
                     ->values();
 
                 $employees = Employee::query()
-                    ->where('employer_id', $batch->employer_id)
-                    ->whereIn('id', $employeeIds)
-                    ->where('status', Employee::STATUS_ACTIVE)
+                    ->where(
+                        'merchant_id',
+                        $batch->merchant_id
+                    )
+                    ->whereIn(
+                        'id',
+                        $employeeIds
+                    )
+                    ->where(
+                        'status',
+                        Employee::STATUS_ACTIVE
+                    )
                     ->get()
                     ->keyBy('id');
 
-                if ($employees->count() !== $employeeIds->count()) {
+                if (
+                    $employees->count()
+                    !== $employeeIds->count()
+                ) {
                     throw ValidationException::withMessages([
                         'items' => [
-                            'One or more employees do not belong to this employer or are not active.'
+                            'One or more employees do not belong to this merchant or are not active.'
                         ],
                     ]);
                 }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Replace Draft Items
-                |--------------------------------------------------------------------------
-                */
 
                 $batch->items()->delete();
 
@@ -222,9 +328,14 @@ class PayrollBatchService
 
                 foreach ($data['items'] as $item) {
 
-                    $gross = (float) $item['gross_amount'];
-                    $deduction = (float) $item['deduction_amount'];
-                    $net = $gross - $deduction;
+                    $gross =
+                        (float) $item['gross_amount'];
+
+                    $deduction =
+                        (float) $item['deduction_amount'];
+
+                    $net =
+                        $gross - $deduction;
 
                     if ($net < 0) {
                         throw ValidationException::withMessages([
@@ -235,33 +346,68 @@ class PayrollBatchService
                     }
 
                     $batch->items()->create([
-                        'employee_id' => $item['employee_id'],
-                        'gross_amount' => $gross,
-                        'deduction_amount' => $deduction,
-                        'net_amount' => $net,
+                        'employee_id' =>
+                            $item['employee_id'],
+
+                        'gross_amount' =>
+                            $gross,
+
+                        'deduction_amount' =>
+                            $deduction,
+
+                        'net_amount' =>
+                            $net,
+
                         'status' => 1,
-                        'payout_status' => 'NOT_RELEASED',
+
+                        'payout_status' =>
+                            'NOT_RELEASED',
                     ]);
 
                     $totalGross += $gross;
-                    $totalDeductions += $deduction;
+
+                    $totalDeductions +=
+                        $deduction;
+
                     $totalNet += $net;
                 }
 
                 $batch->update([
-                    'total_employees' => count($data['items']),
-                    'total_gross_amount' => $totalGross,
-                    'total_deduction_amount' => $totalDeductions,
-                    'total_net_amount' => $totalNet,
+                    'total_employees' =>
+                        count($data['items']),
+
+                    'total_gross_amount' =>
+                        $totalGross,
+
+                    'total_deduction_amount' =>
+                        $totalDeductions,
+
+                    'total_net_amount' =>
+                        $totalNet,
                 ]);
             }
 
-            return $batch->load('items.employee');
+            return $batch->refresh()
+                ->load([
+                    'merchant',
+                    'items.employee',
+                ]);
         });
     }
 
-    public function submit(PayrollBatch $batch): PayrollBatch {
-        if ($batch->status !== PayrollBatch::STATUS_DRAFT) {
+    /*
+    |--------------------------------------------------------------------------
+    | Submit
+    |--------------------------------------------------------------------------
+    */
+
+    public function submit(
+        PayrollBatch $batch
+    ): PayrollBatch {
+        if (
+            $batch->status
+            !== PayrollBatch::STATUS_DRAFT
+        ) {
             throw ValidationException::withMessages([
                 'payroll_batch' => [
                     'Only DRAFT payroll batches can be submitted.'
@@ -269,7 +415,9 @@ class PayrollBatchService
             ]);
         }
 
-        if ($batch->items()->count() === 0) {
+        if (
+            ! $batch->items()->exists()
+        ) {
             throw ValidationException::withMessages([
                 'payroll_batch' => [
                     'Payroll batch must contain at least one employee.'
@@ -278,10 +426,17 @@ class PayrollBatchService
         }
 
         $batch->update([
-            'status' => PayrollBatch::STATUS_SUBMITTED,
+            'status' =>
+                PayrollBatch::STATUS_SUBMITTED,
+
             'submitted_at' => now(),
         ]);
 
-        return $batch->refresh()->load('items.employee');
+        return $batch
+            ->refresh()
+            ->load([
+                'merchant',
+                'items.employee',
+            ]);
     }
 }

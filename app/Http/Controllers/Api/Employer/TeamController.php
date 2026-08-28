@@ -18,12 +18,16 @@ class TeamController extends BaseApiController
     ) {
     }
 
+    /**
+     * List all employees belonging to the authenticated
+     * Employer's Merchant.
+     */
     public function index(EmployeeFilterRequest $request)
     {
         $user = $request->user();
 
         $employees = $this->employeeService->index(
-            $user->id,
+            $user->merchant_id,
             $request->validated()
         );
 
@@ -33,12 +37,16 @@ class TeamController extends BaseApiController
         );
     }
 
+    /**
+     * Create an employee under the authenticated
+     * Employer's Merchant.
+     */
     public function store(StoreEmployeeRequest $request)
     {
         $user = $request->user();
 
         $employee = $this->employeeService->store(
-            $user->id,
+            $user->merchant_id,
             $request->validated()
         );
 
@@ -49,13 +57,19 @@ class TeamController extends BaseApiController
         );
     }
 
-    public function show(Request $request, string $uuid)
-    {
+    /**
+     * View an employee belonging to the authenticated
+     * Employer's Merchant.
+     */
+    public function show(
+        Request $request,
+        string $uuid
+    ) {
         $user = $request->user();
 
         $employee = $this->employeeService->show(
             $uuid,
-            $user->id
+            $user->merchant_id
         );
 
         return $this->success(
@@ -64,12 +78,19 @@ class TeamController extends BaseApiController
         );
     }
 
-    public function update(UpdateEmployeeRequest $request, string $uuid) {
+    /**
+     * Update an employee belonging to the authenticated
+     * Employer's Merchant.
+     */
+    public function update(
+        UpdateEmployeeRequest $request,
+        string $uuid
+    ) {
         $user = $request->user();
 
         $employee = $this->employeeService->show(
             $uuid,
-            $user->id
+            $user->merchant_id
         );
 
         $employee = $this->employeeService->update(
@@ -83,16 +104,24 @@ class TeamController extends BaseApiController
         );
     }
 
-    public function destroy(Request $request, string $uuid)
-    {
+    /**
+     * Soft delete an employee belonging to the authenticated
+     * Employer's Merchant.
+     */
+    public function destroy(
+        Request $request,
+        string $uuid
+    ) {
         $user = $request->user();
 
         $employee = $this->employeeService->show(
             $uuid,
-            $user->id
+            $user->merchant_id
         );
 
-        $this->employeeService->destroy($employee);
+        $this->employeeService->destroy(
+            $employee
+        );
 
         return $this->success(
             null,

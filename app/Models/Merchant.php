@@ -41,4 +41,12 @@ class Merchant extends Model
             'merchant_id'
         );
     }
+    
+    public function employees()
+    {
+        return $this->hasMany(
+            Employee::class,
+            'merchant_id'
+        );
+    }
 }

@@ -1,23 +1,19 @@
 <?php
 
-namespace App\Repositories\Employee;
+namespace App\Repositories\Merchant;
 
 use App\Models\Employee;
-use App\Repositories\BaseRepository;
 
-class EmployeeRepository extends BaseRepository
+class MerchantEmployeeRepository
 {
-    public function __construct(Employee $model)
-    {
-        $this->model = $model;
-    }
-
-    /**
-     * Get employees belonging to a merchant.
-     */
-    public function paginateByMerchant(int $merchantId, array $filters = []) {
-        $query = $this->model
-            ->newQuery()
+    public function paginateByMerchant(
+        int $merchantId,
+        array $filters = []
+    ) {
+        $query = Employee::query()
+            ->with([
+                'merchant',
+            ])
             ->where('merchant_id', $merchantId);
 
         /*
@@ -27,11 +23,9 @@ class EmployeeRepository extends BaseRepository
         */
 
         if (!empty($filters['search'])) {
-
             $search = $filters['search'];
 
             $query->where(function ($q) use ($search) {
-
                 $q->where(
                     'employee_no',
                     'like',
@@ -67,7 +61,6 @@ class EmployeeRepository extends BaseRepository
                     'like',
                     "%{$search}%"
                 );
-
             });
         }
 
@@ -78,19 +71,11 @@ class EmployeeRepository extends BaseRepository
         */
 
         if (isset($filters['status'])) {
-
             $query->where(
                 'status',
                 $filters['status']
             );
-
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Sorting / Pagination
-        |--------------------------------------------------------------------------
-        */
 
         return $query
             ->orderBy('last_name')
@@ -98,16 +83,5 @@ class EmployeeRepository extends BaseRepository
             ->paginate(
                 $filters['per_page'] ?? 20
             );
-    }
-
-    /**
-     * Find an employee belonging to a merchant.
-     */
-    public function findByUuidForMerchant(string $uuid, int $merchantId): ?Employee {
-        return $this->model
-            ->newQuery()
-            ->where('uuid', $uuid)
-            ->where('merchant_id', $merchantId)
-            ->first();
     }
 }

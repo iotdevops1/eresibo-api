@@ -19,14 +19,14 @@ class PayrollBatchController extends BaseApiController
     }
 
     /**
-     * List payroll batches for the authenticated employer.
+     * List payroll batches for the authenticated employer's merchant.
      */
     public function index(PayrollBatchFilterRequest $request)
     {
         $user = $request->user();
 
         $batches = $this->payrollBatchService->index(
-            $user->id,
+            $user->merchant_id,
             $request->validated()
         );
 
@@ -44,7 +44,7 @@ class PayrollBatchController extends BaseApiController
         $user = $request->user();
 
         $batch = $this->payrollBatchService->store(
-            $user->id,
+            $user->merchant_id,
             $request->validated()
         );
 
@@ -56,15 +56,12 @@ class PayrollBatchController extends BaseApiController
     }
 
     /**
-     * View a payroll batch.
-     */
-    public function show(Request $request,string $uuid) {
+    * View a payroll batch.
+    */
+    public function show(Request $request, string $uuid) {
         $user = $request->user();
 
-        $batch = $this->payrollBatchService->show(
-            $uuid,
-            $user->id
-        );
+        $batch = $this->payrollBatchService->show($uuid, $user->merchant_id);
 
         return $this->success(
             new PayrollBatchResource($batch),
@@ -75,12 +72,15 @@ class PayrollBatchController extends BaseApiController
     /**
      * Update a draft payroll batch.
      */
-    public function update(UpdatePayrollBatchRequest $request, string $uuid) {
+    public function update(
+        UpdatePayrollBatchRequest $request,
+        string $uuid
+    ) {
         $user = $request->user();
 
         $batch = $this->payrollBatchService->show(
             $uuid,
-            $user->id
+            $user->merchant_id
         );
 
         $batch = $this->payrollBatchService->update(
@@ -94,12 +94,15 @@ class PayrollBatchController extends BaseApiController
         );
     }
 
-    public function submit(Request $request,string $uuid) {
-        $user = $request->user();
+    /**
+     * Submit a payroll batch.
+     */
+    public function submit(Request $request, string $uuid ) {
 
+        $user = $request->user();
         $batch = $this->payrollBatchService->show(
             $uuid,
-            $user->id
+            $user->merchant_id
         );
 
         $batch = $this->payrollBatchService->submit(

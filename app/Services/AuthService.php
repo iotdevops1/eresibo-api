@@ -2,24 +2,28 @@
 
 namespace App\Services;
 
+use App\Models\Merchant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use App\Http\Resources\UserResource;
-use App\Http\Resources\LoginResource;
 
 class AuthService
 {
     public function login(array $credentials, Request $request): array
     {
-        $user = User::with('role')
+        $user = User::with([
+            'role',
+            'merchant',
+        ])
             ->where('email', $credentials['email'])
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             throw ValidationException::withMessages([
-                'email' => ['Invalid email or password.'],
+                'email' => [
+                    'Invalid email or password.',
+                ],
             ]);
         }
 
@@ -28,9 +32,15 @@ class AuthService
         | Check if account is locked
         |--------------------------------------------------------------------------
         */
-        if ($user->is_lock || $user->status === User::STATUS_LOCKED) {
+
+        if (
+            $user->is_lock ||
+            $user->status === User::STATUS_LOCKED
+        ) {
             throw ValidationException::withMessages([
-                'email' => ['Your account has been locked. Please contact the administrator.'],
+                'email' => [
+                    'Your account has been locked. Please contact the administrator.',
+                ],
             ]);
         }
 
@@ -39,19 +49,24 @@ class AuthService
         | Verify password
         |--------------------------------------------------------------------------
         */
-        if (! Hash::check($credentials['password'], $user->password)) {
 
+        if (! Hash::check(
+            $credentials['password'],
+            $user->password
+        )) {
             $user->increment('login_attempt');
 
             if ($user->login_attempt >= 5) {
                 $user->update([
-                    'status'  => User::STATUS_LOCKED,
+                    'status' => User::STATUS_LOCKED,
                     'is_lock' => true,
                 ]);
             }
 
             throw ValidationException::withMessages([
-                'email' => ['Invalid email or password.'],
+                'email' => [
+                    'Invalid email or password.',
+                ],
             ]);
         }
 
@@ -60,10 +75,44 @@ class AuthService
         | Check account status
         |--------------------------------------------------------------------------
         */
+
         if ($user->status !== User::STATUS_ACTIVE) {
             throw ValidationException::withMessages([
-                'email' => ['Your account is inactive.'],
+                'email' => [
+                    'Your account is inactive.',
+                ],
             ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Employer Merchant Validation
+        |--------------------------------------------------------------------------
+        |
+        | Every EMPLOYER account must belong to an active Merchant.
+        |
+        */
+
+        if ($user->role?->code === 'EMPLOYER') {
+
+            if (! $user->merchant_id) {
+                throw ValidationException::withMessages([
+                    'email' => [
+                        'This Employer account is not associated with a Merchant.',
+                    ],
+                ]);
+            }
+
+            if (
+                ! $user->merchant ||
+                $user->merchant->status !== Merchant::STATUS_ACTIVE
+            ) {
+                throw ValidationException::withMessages([
+                    'email' => [
+                        'The Merchant associated with this Employer account is not active.',
+                    ],
+                ]);
+            }
         }
 
         /*
@@ -74,17 +123,25 @@ class AuthService
 
         $user->update([
             'login_attempt' => 0,
-            'is_login'      => true,
+            'is_login' => true,
             'last_login_at' => now(),
             'last_login_ip' => $request->ip(),
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        /*
+        |--------------------------------------------------------------------------
+        | Create Access Token
+        |--------------------------------------------------------------------------
+        */
+
+        $token = $user
+            ->createToken('auth_token')
+            ->plainTextToken;
 
         return [
             'access_token' => $token,
-            'token_type'   => 'Bearer',
-            'user'         => $user,
+            'token_type' => 'Bearer',
+            'user' => $user,
         ];
     }
 
@@ -93,7 +150,7 @@ class AuthService
         $user->update([
             'is_login' => false,
         ]);
+
         $user->currentAccessToken()?->delete();
     }
-
 }
