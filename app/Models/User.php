@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Employee;
 
 class User extends Authenticatable
 {
@@ -37,6 +38,7 @@ class User extends Authenticatable
         'last_login_at',
         'last_login_ip',
         'merchant_id',
+        'must_change_password',
     ];
 
     protected $hidden = [
@@ -52,6 +54,7 @@ class User extends Authenticatable
         'password' => 'hashed',
         'is_login' => 'boolean',
         'is_lock' => 'boolean',
+        'must_change_password' => 'boolean',
     ];
 
     public function uniqueIds(): array
@@ -119,5 +122,10 @@ class User extends Authenticatable
     public function isEmployer(): bool
     {
         return $this->role?->code === 'EMPLOYER';
+    }
+
+    public function employee()
+    {
+        return $this->hasOne(Employee::class, 'user_id');
     }
 }

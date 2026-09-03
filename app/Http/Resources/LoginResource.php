@@ -15,6 +15,7 @@ class LoginResource extends JsonResource
         return [
             'access_token' => $this['access_token'],
             'token_type'   => $this['token_type'],
+            'must_change_password' => (bool) ($this->resource['must_change_password'] ?? false),
             'user'         => new UserResource($this['user']),
         ];
     }

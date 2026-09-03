@@ -9,6 +9,7 @@ use App\Http\Controllers\ReceiptController;
 
 
 use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\Auth\ChangePasswordController;
 use App\Http\Controllers\Api\Auth\MeController;
 use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Admin\UserController;
@@ -42,6 +43,7 @@ Route::prefix('auth')->group(function () {
         Route::get('/me',      MeController::class);
         Route::post('/logout', LogoutController::class);
         Route::get('/sidebar', [ModuleController::class, 'sidebar'])->middleware('permission:sidebar.view');
+        Route::post('/change-password', ChangePasswordController::class);
     }); 
 });
 

@@ -142,6 +142,7 @@ class AuthService
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user,
+            'must_change_password' => (bool) $user->must_change_password,
         ];
     }
 
@@ -150,6 +151,59 @@ class AuthService
         $user->update([
             'is_login' => false,
         ]);
+
+        $user->currentAccessToken()?->delete();
+    }
+
+    public function changePassword(User $user, string $currentPassword, string $newPassword ): void {
+        /*
+        |--------------------------------------------------------------------------
+        | Verify current password
+        |--------------------------------------------------------------------------
+        */
+
+        if (! Hash::check($currentPassword, $user->password)) {
+            throw ValidationException::withMessages([
+                'currentPassword' => [
+                    'The current password is incorrect.',
+                ],
+            ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent reusing the same password
+        |--------------------------------------------------------------------------
+        */
+
+        if (Hash::check($newPassword, $user->password)) {
+            throw ValidationException::withMessages([
+                'newPassword' => [
+                    'The new password must be different from your current password.',
+                ],
+            ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update password
+        |--------------------------------------------------------------------------
+        |
+        | User model already casts password as "hashed", so we pass the
+        | plain new password and Laravel will hash it.
+        |
+        */
+
+        $user->update([
+            'password' => $newPassword,
+            'must_change_password' => false,
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Invalidate current access token
+        |--------------------------------------------------------------------------
+        */
 
         $user->currentAccessToken()?->delete();
     }

@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Employee;
-use App\Models\PayrollBatch;
+use App\Models\User;
+use App\Models\Merchant;
 use App\Models\PayrollBatchItem;
 
 class Employee extends Model
@@ -16,6 +16,7 @@ class Employee extends Model
     protected $fillable = [
         'uuid',
         'merchant_id',
+        'user_id',
         'employee_no',
         'first_name',
         'middle_name',
@@ -71,5 +72,10 @@ class Employee extends Model
             Merchant::class,
             'merchant_id'
         );
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

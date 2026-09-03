@@ -16,7 +16,6 @@ class StoreEmployeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-
             'employee_no' => [
                 'required',
                 'string',
@@ -41,10 +40,29 @@ class StoreEmployeeRequest extends FormRequest
                 'max:100',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | Employee login email
+            |--------------------------------------------------------------------------
+            */
+
             'email' => [
-                'nullable',
+                'required',
                 'email',
                 'max:255',
+                'unique:users,email',
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Temporary login password
+            |--------------------------------------------------------------------------
+            */
+
+            'temporaryPassword' => [
+                'required',
+                'string',
+                'min:8',
             ],
 
             'mobile' => [
