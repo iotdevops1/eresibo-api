@@ -323,7 +323,7 @@ class ModuleSeeder extends Seeder
             [
                 'name' => 'Team directory',
                 'icon' => 'users',
-                'route' => '/employer/team',
+                'route' => '/employer/team-directory',
                 'permission_code' => 'team.view',
                 'sort_order' => 7,
                 'is_menu' => true,

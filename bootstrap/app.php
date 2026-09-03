@@ -17,7 +17,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
 
         $middleware->redirectGuestsTo(function (Request $request) {
-
             if ($request->is('api/*')) {
                 return null;
             }
@@ -26,10 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $middleware->alias([
-            'role' => \App\Http\Middleware\CheckRole::class,
-            'permission' => \App\Http\Middleware\CheckPermission::class,
+            'role'                => \App\Http\Middleware\CheckRole::class,
+            'permission'          => \App\Http\Middleware\CheckPermission::class,
+            'integration.api_key' => \App\Http\Middleware\AuthenticateIntegrationApiKey::class,
+            'internal.portal'     => \App\Http\Middleware\AuthenticateInternalPortal::class,
+            'internal.api'        => \App\Http\Middleware\AuthenticateInternalPortal::class,
         ]);
-
     })
     ->withExceptions(function (Exceptions $exceptions): void {
 
@@ -37,10 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*'),
         );
 
-        $exceptions->render(function (
-            NotFoundHttpException $e,
-            Request $request
-        ) {
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
 
             if (! $request->is('api/*')) {
                 return null;
@@ -53,10 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         });
 
-        $exceptions->render(function (
-            ModelNotFoundException $e,
-            Request $request
-        ) {
+        $exceptions->render(function (ModelNotFoundException $e, Request $request) {
 
             if (! $request->is('api/*')) {
                 return null;
@@ -69,10 +64,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         });
 
-        $exceptions->render(function (
-            Throwable $e,
-            Request $request
-        ) {
+        $exceptions->render(function (Throwable $e, Request $request) {
 
             if (! $request->is('api/*')) {
                 return null;

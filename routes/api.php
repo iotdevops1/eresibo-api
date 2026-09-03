@@ -3,6 +3,11 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\Api\V1\Integration\PusoPayReceiptController;
+use App\Http\Controllers\Api\V1\Internal\ReceiptLookupController;
+use App\Http\Controllers\ReceiptController;
+
+
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\MeController;
 use App\Http\Controllers\Api\Auth\LogoutController;
@@ -19,6 +24,18 @@ use App\Http\Controllers\Api\Admin\MerchantEmployeeController;
 use App\Http\Controllers\Api\Employer\TeamController;
 use App\Http\Controllers\Api\Employer\PayrollBatchController;
 
+// Integrations
+Route::prefix('v1/integrations/pusopay')->middleware('integration.api_key')->group(function () {
+    Route::post('/receipts', [PusoPayReceiptController::class, 'store']);
+});
+
+// Internal API for Portal
+Route::prefix('v1/internal')->middleware('internal.api')->group(function () {
+    Route::get('/receipts/{token}', [ReceiptLookupController::class, 'show']);
+});
+
+
+// Auth
 Route::prefix('auth')->group(function () {
     Route::post('/login', LoginController::class);
     Route::middleware('auth:sanctum')->group(function () {
