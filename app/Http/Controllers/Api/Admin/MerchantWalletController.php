@@ -7,6 +7,8 @@ use App\Http\Requests\Wallet\PrefundMerchantRequest;
 use App\Models\Merchant;
 use App\Models\Wallet;
 use App\Services\Wallet\WalletService;
+use App\Http\Resources\MerchantWalletResource;
+use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
@@ -137,6 +139,25 @@ class MerchantWalletController extends Controller
             $transaction->load('entries'),
             'Merchant wallet prefunded successfully.',
             201
+        );
+    }
+
+    public function merchants(Request $request)
+    {
+        $perPage = (int) $request->get('per_page', 20);
+
+        $wallets = Wallet::query()
+            ->where(
+                'owner_type',
+                Wallet::OWNER_TYPE_MERCHANT
+            )
+            ->where('currency', 'PHP')
+            ->with('merchant')
+            ->paginate($perPage);
+
+        return $this->success(
+            MerchantWalletResource::collection($wallets),
+            'Merchant wallets retrieved successfully.'
         );
     }
 }

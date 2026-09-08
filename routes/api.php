@@ -129,5 +129,6 @@ Route::prefix('employer')->middleware(['auth:sanctum', 'role:EMPLOYER',])->group
 
 
 Route::middleware(['auth:sanctum', 'role:SUPER_ADMIN',])->prefix('admin/wallets')->group(function () {
+    Route::get('/merchants', [MerchantWalletController::class, 'merchants']);
     Route::post('/merchants/{merchantUuid}/prefund', [MerchantWalletController::class, 'prefund']);
 });

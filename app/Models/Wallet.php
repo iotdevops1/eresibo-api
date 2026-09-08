@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\WalletMerchantFunding;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Wallet;
+use App\Models\Merchant;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Wallet extends Model
 {
@@ -68,5 +70,13 @@ class Wallet extends Model
     {
         return $this->hasMany(Wallet::class, 'owner_id')
             ->where('owner_type', Wallet::OWNER_TYPE_MERCHANT);
+    }
+
+    public function merchant(): BelongsTo
+    {
+        return $this->belongsTo(
+            Merchant::class,
+            'owner_id'
+        );
     }
 }
