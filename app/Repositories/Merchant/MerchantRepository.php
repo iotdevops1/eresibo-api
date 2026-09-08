@@ -3,6 +3,7 @@
 namespace App\Repositories\Merchant;
 
 use App\Models\Merchant;
+use App\Models\Wallet;
 use App\Repositories\BaseRepository;
 
 class MerchantRepository extends BaseRepository
@@ -16,11 +17,16 @@ class MerchantRepository extends BaseRepository
     {
         $query = $this->model
             ->newQuery()
+            ->with([
+                'wallets' => function ($query) {
+                    $query->where('currency', 'PHP')
+                        ->where('status', Wallet::STATUS_ACTIVE);
+                },
+            ])
             ->withCount([
                 'employers',
                 'employees',
             ]);
-            
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
@@ -45,6 +51,12 @@ class MerchantRepository extends BaseRepository
     {
         return $this->model
             ->newQuery()
+            ->with([
+                'wallets' => function ($query) {
+                    $query->where('currency', 'PHP')
+                        ->where('status', Wallet::STATUS_ACTIVE);
+                },
+            ])
             ->withCount([
                 'employers',
                 'employees',

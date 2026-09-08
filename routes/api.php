@@ -16,10 +16,13 @@ use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\PermissionController;
 use App\Http\Controllers\Api\Admin\ModuleController;
+
 use App\Http\Controllers\Api\Admin\MerchantController;
 use App\Http\Controllers\Api\Admin\MerchantEmployerController;
 use App\Http\Controllers\Api\Admin\MerchantEmployeeController;
+use App\Http\Controllers\Api\Admin\MerchantWalletController;
 
+use App\Http\Controllers\Api\V1\Integration\PusoPayFundingController;
 
 // Employer
 use App\Http\Controllers\Api\Employer\TeamController;
@@ -28,6 +31,10 @@ use App\Http\Controllers\Api\Employer\PayrollBatchController;
 // Integrations
 Route::prefix('v1/integrations/pusopay')->middleware('integration.api_key')->group(function () {
     Route::post('/receipts', [PusoPayReceiptController::class, 'store']);
+});
+
+Route::middleware('integration.api_key')->prefix('v1/integrations/pusopay')->group(function () {
+    Route::post('/fundings/confirm', [PusoPayFundingController::class, 'confirm']);
 });
 
 // Internal API for Portal
@@ -48,7 +55,6 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,ADMIN',])->group(function () {
-
     // Merchant
     Route::get('/merchants',           [MerchantController::class, 'index'])->middleware('permission:management.view');
     Route::post('/merchants',          [MerchantController::class, 'store'])->middleware('permission:management.create');
@@ -81,13 +87,20 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,ADMIN',])-
     // Permission Management
     Route::get('/permissions',              [PermissionController::class, 'index'])->middleware('permission:roles.view');
     Route::put('/roles/{uuid}/permissions', [RoleController::class, 'updatePermissions'])->middleware('permission:roles.update');
-
-   
-
 });
 
-Route::prefix('employer')->middleware(['auth:sanctum', 'role:EMPLOYER',])->group(function () {
 
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Employer Route
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('employer')->middleware(['auth:sanctum', 'role:EMPLOYER',])->group(function () {
     /*
     |--------------------------------------------------------------------------
     | Team Directory
@@ -99,19 +112,22 @@ Route::prefix('employer')->middleware(['auth:sanctum', 'role:EMPLOYER',])->group
     Route::put('/team/{uuid}',    [TeamController::class, 'update'])->middleware('permission:team.update');
     Route::patch('/team/{uuid}',  [TeamController::class, 'update'])->middleware('permission:team.update');
     Route::delete('/team/{uuid}', [TeamController::class, 'destroy'])->middleware('permission:team.delete');
- 
-
     /*
     |--------------------------------------------------------------------------
     | Payroll Batches
     |--------------------------------------------------------------------------
     */
-
     Route::get('/payroll-batches',                [PayrollBatchController::class, 'index'])->middleware('permission:payroll_batches.view');
     Route::post('/payroll-batches',               [PayrollBatchController::class, 'store'])->middleware('permission:payroll_batches.create');
     Route::get('/payroll-batches/{uuid}',         [PayrollBatchController::class, 'show'])->middleware('permission:payroll_batches.view');
     Route::patch('/payroll-batches/{uuid}',       [PayrollBatchController::class, 'update'])->middleware('permission:payroll_batches.update');
     Route::post('/payroll-batches/{uuid}/submit', [PayrollBatchController::class, 'submit'])->middleware('permission:payroll_batches.submit');
-   
+});
 
+
+
+
+
+Route::middleware(['auth:sanctum', 'role:SUPER_ADMIN',])->prefix('admin/wallets')->group(function () {
+    Route::post('/merchants/{merchantUuid}/prefund', [MerchantWalletController::class, 'prefund']);
 });

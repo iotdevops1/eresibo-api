@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Wallet;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Merchant extends Model
 {
@@ -48,5 +50,11 @@ class Merchant extends Model
             Employee::class,
             'merchant_id'
         );
+    }
+
+    public function wallets(): HasMany
+    {
+        return $this->hasMany(Wallet::class, 'owner_id')
+            ->where('owner_type', Wallet::OWNER_TYPE_MERCHANT);
     }
 }

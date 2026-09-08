@@ -10,6 +10,7 @@ use App\Http\Resources\MerchantCollection;
 use App\Http\Resources\MerchantResource;
 use App\Services\Merchant\MerchantService;
 use Illuminate\Http\Request;
+use App\Models\Wallet;
 
 class MerchantController extends BaseApiController
 {

@@ -39,6 +39,20 @@ class MerchantResource extends JsonResource
 
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
+            'wallet_balance_minor_units' => $this->whenLoaded(
+            'wallets',
+                fn () => $this->wallets->first()?->balance_minor_units ?? 0
+            ),
+
+            'wallet_balance_major_units' => $this->whenLoaded(
+                'wallets',
+                fn () => $this->wallets->first()?->balance_major_units ?? '0.00'
+            ),
+
+            'wallet_currency' => $this->whenLoaded(
+                'wallets',
+                fn () => $this->wallets->first()?->currency ?? 'PHP'
+            ),
         ];
     }
 }
