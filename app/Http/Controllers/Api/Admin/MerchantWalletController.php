@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
+use App\Http\Resources\MerchantWalletCollection;
 
 class MerchantWalletController extends Controller
 {
@@ -142,12 +143,11 @@ class MerchantWalletController extends Controller
         );
     }
 
-    public function merchants(Request $request)
+    public function merchants(\Illuminate\Http\Request $request)
     {
         $perPage = (int) $request->get('per_page', 20);
 
-        $wallets = Wallet::query()
-            ->where(
+        $wallets = Wallet::query()->where(
                 'owner_type',
                 Wallet::OWNER_TYPE_MERCHANT
             )
@@ -156,7 +156,7 @@ class MerchantWalletController extends Controller
             ->paginate($perPage);
 
         return $this->success(
-            MerchantWalletResource::collection($wallets),
+            new MerchantWalletCollection($wallets),
             'Merchant wallets retrieved successfully.'
         );
     }
