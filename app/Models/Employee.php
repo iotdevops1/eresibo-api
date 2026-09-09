@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\User;
 use App\Models\Merchant;
 use App\Models\PayrollBatchItem;
+use App\Models\Employee;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Employee extends Model
 {
@@ -77,5 +79,13 @@ class Employee extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function employee(): HasOne
+    {
+        return $this->hasOne(
+            Employee::class,
+            'user_id'
+        );
     }
 }

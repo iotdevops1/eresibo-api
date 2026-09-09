@@ -51,6 +51,7 @@ Route::prefix('auth')->group(function () {
         Route::post('/logout', LogoutController::class);
         Route::get('/sidebar', [ModuleController::class, 'sidebar'])->middleware('permission:sidebar.view');
         Route::post('/change-password', ChangePasswordController::class);
+        Route::post('/users/{userUuid}/temporary-password', [UserController::class, 'generateTemporaryPassword'])->middleware('permission:management.update');
     }); 
 });
 
