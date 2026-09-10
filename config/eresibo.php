@@ -7,6 +7,20 @@ return [
         90
     ),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Public Portal URL
+    |--------------------------------------------------------------------------
+    |
+    | Used when generating public receipt URLs returned to third parties.
+    |
+    */
+
+    'portal_url' => env(
+        'ERESIBO_PORTAL_URL',
+        'https://eresibo.com'
+    ),
+
     'pusopay' => [
 
         'webhook_url' =>
