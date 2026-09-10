@@ -44,7 +44,7 @@ class Receipt extends Model
 
     public function getPublicUrlAttribute(): string
     {
-        return rtrim(config('services.portal.url'), '/') . '/r/' . $this->public_token;
+         return rtrim(config('eresibo.portal_url', config('services.portal.url')), '/') . '/r/' . $this->public_token;
     }
 
     public function isExpired(): bool
