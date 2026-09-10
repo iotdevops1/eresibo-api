@@ -93,6 +93,7 @@ class EmployeeRepository extends BaseRepository
         */
 
         return $query
+            ->with('user')
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->paginate(
