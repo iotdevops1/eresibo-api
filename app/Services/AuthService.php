@@ -12,16 +12,30 @@ class AuthService
 {
     public function login(array $credentials, Request $request): array
     {
+        $username = trim($credentials['username']);
+
         $user = User::with([
             'role',
             'merchant',
         ])
-            ->where('email', $credentials['email'])
+            ->where(function ($query) use ($username) {
+                if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
+                    $query->where(
+                        'email',
+                        strtolower($username)
+                    );
+                } else {
+                    $query->where(
+                        'mobile',
+                        $this->normalizeMobile($username)
+                    );
+                }
+            })
             ->first();
 
         if (! $user) {
             throw ValidationException::withMessages([
-                'email' => [
+                'username' => [
                     'Invalid email or password.',
                 ],
             ]);
@@ -38,7 +52,7 @@ class AuthService
             $user->status === User::STATUS_LOCKED
         ) {
             throw ValidationException::withMessages([
-                'email' => [
+                'username' => [
                     'Your account has been locked. Please contact the administrator.',
                 ],
             ]);
@@ -64,7 +78,7 @@ class AuthService
             }
 
             throw ValidationException::withMessages([
-                'email' => [
+                'username' => [
                     'Invalid email or password.',
                 ],
             ]);
@@ -78,7 +92,7 @@ class AuthService
 
         if ($user->status !== User::STATUS_ACTIVE) {
             throw ValidationException::withMessages([
-                'email' => [
+                'username' => [
                     'Your account is inactive.',
                 ],
             ]);
@@ -94,10 +108,9 @@ class AuthService
         */
 
         if ($user->role?->code === 'EMPLOYER') {
-
             if (! $user->merchant_id) {
                 throw ValidationException::withMessages([
-                    'email' => [
+                    'username' => [
                         'This Employer account is not associated with a Merchant.',
                     ],
                 ]);
@@ -108,7 +121,7 @@ class AuthService
                 $user->merchant->status !== Merchant::STATUS_ACTIVE
             ) {
                 throw ValidationException::withMessages([
-                    'email' => [
+                    'username' => [
                         'The Merchant associated with this Employer account is not active.',
                     ],
                 ]);
@@ -146,6 +159,36 @@ class AuthService
         ];
     }
 
+    /**
+     * Normalize Philippine mobile numbers.
+     *
+     * Accepted:
+     * 09171234567
+     * +639171234567
+     * 639171234567
+     *
+     * Canonical format:
+     * 09171234567
+     */
+    private function normalizeMobile(string $mobile): string
+    {
+        $mobile = preg_replace(
+            '/[\s\-()]+/',
+            '',
+            trim($mobile)
+        );
+
+        if (str_starts_with($mobile, '+63')) {
+            return '0' . substr($mobile, 3);
+        }
+
+        if (str_starts_with($mobile, '63')) {
+            return '0' . substr($mobile, 2);
+        }
+
+        return $mobile;
+    }
+
     public function logout($user): void
     {
         $user->update([
@@ -155,7 +198,11 @@ class AuthService
         $user->currentAccessToken()?->delete();
     }
 
-    public function changePassword(User $user, string $currentPassword, string $newPassword ): void {
+    public function changePassword(
+        User $user,
+        string $currentPassword,
+        string $newPassword
+    ): void {
         /*
         |--------------------------------------------------------------------------
         | Verify current password
@@ -188,10 +235,6 @@ class AuthService
         |--------------------------------------------------------------------------
         | Update password
         |--------------------------------------------------------------------------
-        |
-        | User model already casts password as "hashed", so we pass the
-        | plain new password and Laravel will hash it.
-        |
         */
 
         $user->update([
