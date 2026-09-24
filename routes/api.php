@@ -29,9 +29,11 @@ use App\Http\Controllers\Api\Employer\TeamController;
 use App\Http\Controllers\Api\Employer\PayrollBatchController;
 use App\Http\Controllers\Api\Employer\PayslipController;
 use App\Http\Controllers\Api\Employer\WalletController as EmployerWalletController;
+use App\Http\Controllers\Api\Employer\DisputeController;
 use App\Http\Controllers\Api\Employee\PayslipAcknowledgementController;
 use App\Http\Controllers\Api\Employee\PayslipController as EmployeePayslipController;
 use App\Http\Controllers\Api\Employee\WalletController;
+use App\Http\Controllers\Api\Employee\CaseController;
 use App\Http\Controllers\Api\Wallet\TransactionController;
 
 // Integrations
@@ -134,6 +136,11 @@ Route::prefix('employer')->middleware(['auth:sanctum', 'role:EMPLOYER',])->group
     | Payslips
     */
     Route::post('/payslips', [PayslipController::class, 'store'])->middleware('permission:payslips.create');
+    Route::get('/disputes', [DisputeController::class, 'index'])->middleware('permission:disputes.view');
+    Route::post('/disputes', [DisputeController::class, 'store'])->middleware('permission:disputes.create');
+    Route::get('/disputes/{uuid}', [DisputeController::class, 'show'])->middleware('permission:disputes.view');
+    Route::patch('/disputes/{uuid}', [DisputeController::class, 'update'])->middleware('permission:disputes.update');
+    Route::post('/disputes/{uuid}/messages', [DisputeController::class, 'addMessage'])->middleware('permission:disputes.update');
     Route::get('/transactions', [TransactionController::class, 'employerIndex']);
     Route::get('/transactions/{uuid}', [TransactionController::class, 'employerShow']);
     Route::get('/merchant-transactions', [TransactionController::class, 'merchantIndex']);
@@ -150,6 +157,10 @@ Route::prefix('employee')->middleware(['auth:sanctum', 'role:EMPLOYEE'])->group(
     Route::post('/payslips/{uuid}/acknowledge', [PayslipAcknowledgementController::class, 'store']);
     Route::get('/payslips', [EmployeePayslipController::class, 'index']);
     Route::get('/payslips/{uuid}', [EmployeePayslipController::class, 'show']);
+    Route::get('/cases', [CaseController::class, 'index']);
+    Route::post('/cases', [CaseController::class, 'store']);
+    Route::get('/cases/{uuid}', [CaseController::class, 'show']);
+    Route::post('/cases/{uuid}/messages', [CaseController::class, 'addMessage']);
     Route::get('/wallet', [WalletController::class, 'show']);
     Route::get('/transactions', [TransactionController::class, 'employeeIndex']);
     Route::get('/transactions/{uuid}', [TransactionController::class, 'employeeShow']);

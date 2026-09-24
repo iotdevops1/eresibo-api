@@ -162,6 +162,7 @@ class PermissionSeeder extends Seeder
 
         ['module' => 'EMPLOYER', 'code' => 'disputes.view', 'name' => 'View Disputes'],
         ['module' => 'EMPLOYER', 'code' => 'disputes.create', 'name' => 'Create Dispute'],
+        ['module' => 'EMPLOYER', 'code' => 'disputes.update', 'name' => 'Update Dispute'],
 
         ['module' => 'EMPLOYER', 'code' => 'reports.view', 'name' => 'View Reports'],
 

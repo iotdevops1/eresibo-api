@@ -202,6 +202,7 @@ class RolePermissionSeeder extends Seeder
                 // Disputes
                 'disputes.view',
                 'disputes.create',
+                'disputes.update',
 
                 // Reports
                 'reports.view',
