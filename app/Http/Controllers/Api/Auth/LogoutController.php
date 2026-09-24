@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Services\Auth\AuthService;
+use App\Http\Controllers\BaseApiController;
+use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class LogoutController extends Controller
+class LogoutController extends BaseApiController
 {
     public function __construct(
         protected AuthService $authService

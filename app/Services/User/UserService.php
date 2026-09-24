@@ -27,7 +27,7 @@ class UserService
 
             $role = UserRole::where(
                 'code',
-                $data['role']
+                $data['role_code']
             )->firstOrFail();
 
             $user = $this->userRepository->create([

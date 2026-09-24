@@ -186,7 +186,7 @@ class WalletService
             $balanceBeforeMinorUnits =
                 (int) $wallet->balance_minor_units;
 
-            if ($balanceBeforeMinorUnits < $amountMinorUnits) {
+            if (($balanceBeforeMinorUnits - (int) $wallet->held_minor_units) < $amountMinorUnits) {
                 throw ValidationException::withMessages([
                     'amount_minor_units' => [
                         'Insufficient wallet balance.',
@@ -378,7 +378,7 @@ class WalletService
 
             $sourceBeforeMinorUnits = (int) $sourceWallet->balance_minor_units;
 
-            if ($sourceBeforeMinorUnits < $amountMinorUnits) {
+            if (($sourceBeforeMinorUnits - (int) $sourceWallet->held_minor_units) < $amountMinorUnits) {
                 throw ValidationException::withMessages([
                     'amount_minor_units' => [
                         'Insufficient wallet balance.',

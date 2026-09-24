@@ -32,12 +32,16 @@ class Wallet extends Model
         'balance_minor_units',
         'balance_major_units',
         'status',
+        'held_minor_units',
+        'held_major_units',
     ];
 
     protected $casts = [
         'balance_minor_units' => 'integer',
         'balance_major_units' => 'decimal:2',
         'status' => 'integer',
+        'held_minor_units' => 'integer',
+        'held_major_units' => 'decimal:2',
     ];
 
     public function uniqueIds(): array

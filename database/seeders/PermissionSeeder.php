@@ -64,6 +64,7 @@ class PermissionSeeder extends Seeder
         ['module' => 'CUSTOMERS', 'code' => 'customers.create', 'name' => 'Create Customer'],
         ['module' => 'CUSTOMERS', 'code' => 'customers.update', 'name' => 'Update Customer'],
         ['module' => 'CUSTOMERS', 'code' => 'customers.delete', 'name' => 'Delete Customer'],
+        ['module' => 'MANAGEMENT', 'code' => 'merchants.view', 'name' => 'View merchants'],
 
         /*
         |--------------------------------------------------------------------------
@@ -148,6 +149,8 @@ class PermissionSeeder extends Seeder
         ['module' => 'EMPLOYER', 'code' => 'payroll_batches.submit', 'name' => 'Submit Payroll Batch'],
 
         ['module' => 'EMPLOYER', 'code' => 'disbursements.view', 'name' => 'View Disbursements'],
+        ['module' => 'EMPLOYER', 'code' => 'disbursements.create', 'name' => 'Create Disbursements'],
+        ['module' => 'EMPLOYER', 'code' => 'disbursements.release', 'name' => 'Release Disbursements'],
 
         ['module' => 'EMPLOYER', 'code' => 'fund_holds.view', 'name' => 'View Fund Holds'],
         ['module' => 'EMPLOYER', 'code' => 'fund_holds.create', 'name' => 'Create Fund Hold'],

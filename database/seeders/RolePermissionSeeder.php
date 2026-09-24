@@ -143,6 +143,7 @@ class RolePermissionSeeder extends Seeder
             /*
             |--------------------------------------------------------------------------
             | CUSTOMER
+                'settings.update',
             |--------------------------------------------------------------------------
             */
 
@@ -157,6 +158,7 @@ class RolePermissionSeeder extends Seeder
                 'document_vault.download',
 
                 'payslips.view',
+                'document_vault.view',
 
                 'settings.view',
                 'settings.update',
@@ -164,6 +166,16 @@ class RolePermissionSeeder extends Seeder
 
             /*
             |--------------------------------------------------------------------------
+            'EMPLOYEE' => [
+                'dashboard.view',
+                'sidebar.view',
+                'transactions.view',
+                'document_vault.view',
+                'document_vault.download',
+                'payslips.view',
+                'settings.view',
+                'settings.update',
+            ],
             | EMPLOYER
             |--------------------------------------------------------------------------
             */
@@ -184,6 +196,8 @@ class RolePermissionSeeder extends Seeder
 
                 // Disbursements
                 'disbursements.view',
+                'disbursements.create',
+                'disbursements.release',
 
                 // Fund holds
                 'fund_holds.view',

@@ -13,6 +13,13 @@ class UpdateUserRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->filled('role') && ! $this->filled('role_code')) {
+            $this->merge(['role_code' => $this->input('role')]);
+        }
+    }
+
     public function rules(): array
     {
         $user = $this->route('user');

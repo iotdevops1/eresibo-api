@@ -3,6 +3,7 @@
 namespace App\Services\Insights;
 
 use App\Models\Dispute;
+use App\Models\AuditLog;
 use App\Models\Payslip;
 use App\Models\PayslipLine;
 use App\Models\User;
@@ -51,6 +52,10 @@ class EmployerInsightsService
         $disputes = $this->repository->disputes($merchantId, $start, $end);
         $yearStart = now()->startOfYear();
         $yearToDate = $this->repository->payslips($merchantId, $yearStart, now());
+        $correctionsCount = AuditLog::query()
+            ->where('merchant_id', $merchantId)->where('event_type', AuditLog::EVENT_PAYSLIP)
+            ->where('event', 'PAYSLIP_CORRECTED')->whereBetween('occurred_at', [$start, $end])
+            ->count();
 
         return [
             'period' => $this->periodData($start, $end, $filters),
@@ -58,8 +63,8 @@ class EmployerInsightsService
                 'acknowledgement_rate_percent' => $this->percentage($acknowledged->count(), $payslips->count()),
                 'average_acknowledgement_hours' => $this->averageAcknowledgementHours($acknowledged),
                 'dispute_rate_percent' => $this->percentage($disputes->count(), $payslips->count()),
-                'correction_rate_percent' => 0,
-                'corrections_count' => 0,
+                'correction_rate_percent' => $this->percentage($correctionsCount, $payslips->count()),
+                'corrections_count' => $correctionsCount,
             ],
             'year_to_date_payroll' => [
                 'net' => $this->amount($yearToDate->sum('net_amount_minor_units')),

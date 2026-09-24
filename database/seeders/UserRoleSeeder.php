@@ -21,6 +21,16 @@ class UserRoleSeeder extends Seeder
                 'description' => 'Can manage customers and receipts.',
             ],
             [
+            [
+                'code' => 'EMPLOYER',
+                'name' => 'Employer',
+                'description' => 'Manages payroll and organization operations.',
+            ],
+            [
+                'code' => 'EMPLOYEE',
+                'name' => 'Employee',
+                'description' => 'Employee self-service account.',
+            ],
                 'code' => 'CUSTOMER',
                 'name' => 'Customer',
                 'description' => 'Regular customer account.',
