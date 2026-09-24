@@ -32,6 +32,7 @@ use App\Http\Controllers\Api\Employer\WalletController as EmployerWalletControll
 use App\Http\Controllers\Api\Employee\PayslipAcknowledgementController;
 use App\Http\Controllers\Api\Employee\PayslipController as EmployeePayslipController;
 use App\Http\Controllers\Api\Employee\WalletController;
+use App\Http\Controllers\Api\Wallet\TransactionController;
 
 // Integrations
 Route::prefix('v1/integrations/pusopay')->middleware('integration.api_key')->group(function () {
@@ -133,6 +134,10 @@ Route::prefix('employer')->middleware(['auth:sanctum', 'role:EMPLOYER',])->group
     | Payslips
     */
     Route::post('/payslips', [PayslipController::class, 'store'])->middleware('permission:payslips.create');
+    Route::get('/transactions', [TransactionController::class, 'employerIndex']);
+    Route::get('/transactions/{uuid}', [TransactionController::class, 'employerShow']);
+    Route::get('/merchant-transactions', [TransactionController::class, 'merchantIndex']);
+    Route::get('/merchant-transactions/{uuid}', [TransactionController::class, 'merchantShow']);
     Route::get('/wallet', [EmployerWalletController::class, 'employer']);
     Route::get('/merchant-wallet', [EmployerWalletController::class, 'merchant']);
 });
@@ -146,6 +151,8 @@ Route::prefix('employee')->middleware(['auth:sanctum', 'role:EMPLOYEE'])->group(
     Route::get('/payslips', [EmployeePayslipController::class, 'index']);
     Route::get('/payslips/{uuid}', [EmployeePayslipController::class, 'show']);
     Route::get('/wallet', [WalletController::class, 'show']);
+    Route::get('/transactions', [TransactionController::class, 'employeeIndex']);
+    Route::get('/transactions/{uuid}', [TransactionController::class, 'employeeShow']);
 });
 
 Route::middleware(['auth:sanctum', 'role:SUPER_ADMIN',])->prefix('admin/wallets')->group(function () {
