@@ -31,7 +31,9 @@ use App\Http\Controllers\Api\Employer\TeamController;
 use App\Http\Controllers\Api\Employer\PayrollBatchController;
 use App\Http\Controllers\Api\Employer\PayslipController;
 use App\Http\Controllers\Api\Employer\DocumentVaultController as EmployerDocumentVaultController;
+use App\Http\Controllers\Api\Employer\InsightController;
 use App\Http\Controllers\Api\Employer\WalletController as EmployerWalletController;
+use App\Http\Controllers\Api\Employer\ReportController;
 use App\Http\Controllers\Api\Employer\DisputeController;
 use App\Http\Controllers\Api\Employee\PayslipAcknowledgementController;
 use App\Http\Controllers\Api\Employee\PayslipController as EmployeePayslipController;
@@ -143,9 +145,15 @@ Route::prefix('employer')->middleware(['auth:sanctum', 'role:EMPLOYER',])->group
     Route::patch('/payroll-batches/{uuid}',       [PayrollBatchController::class, 'update'])->middleware('permission:payroll_batches.update');
     Route::post('/payroll-batches/{uuid}/submit', [PayrollBatchController::class, 'submit'])->middleware('permission:payroll_batches.submit');
 
+    Route::get('/insights/overview', [InsightController::class, 'overview'])->middleware('permission:insights.view');
+    Route::get('/insights/payroll-deep-dive', [InsightController::class, 'payrollDeepDive'])->middleware('permission:insights.view');
+    Route::get('/insights/payslips', [InsightController::class, 'payslips'])->middleware('permission:insights.view');
+    Route::get('/insights/fund-holds', [InsightController::class, 'fundHolds'])->middleware('permission:insights.view');
     /*
     | Payslips
     */
+    Route::get('/reports/payroll-summary', [ReportController::class, 'summary'])->middleware('permission:reports.view');
+    Route::get('/reports/payroll-summary/export', [ReportController::class, 'export'])->middleware('permission:reports.view');
     Route::get('/documents', [EmployerDocumentVaultController::class, 'index'])->middleware('permission:document_vault.view');
     Route::get('/documents/{uuid}', [EmployerDocumentVaultController::class, 'show'])->middleware('permission:document_vault.view');
     Route::patch('/documents/{uuid}', [EmployerDocumentVaultController::class, 'update'])->middleware('permission:document_vault.view');
