@@ -66,11 +66,11 @@ class UpdatePayrollBatchRequest extends FormRequest
                 'min:1',
             ],
 
-            'items.*.employee_id' => [
+            'items.*.employee_uuid' => [
                 'required_with:items',
-                'integer',
+                'uuid',
                 'distinct',
-                'exists:employees,id',
+                'exists:employees,uuid',
             ],
 
             'items.*.gross_amount' => [
@@ -93,9 +93,9 @@ class UpdatePayrollBatchRequest extends FormRequest
     {
         return [
             'items.min'                              => 'At least one employee is required.',
-            'items.*.employee_id.required_with'      => 'Employee is required.',
-            'items.*.employee_id.distinct'           => 'An employee can only appear once in a payroll batch.',
-            'items.*.employee_id.exists'             => 'The selected employee does not exist.',
+            'items.*.employee_uuid.required_with'    => 'Employee is required.',
+            'items.*.employee_uuid.distinct'         => 'An employee can only appear once in a payroll batch.',
+            'items.*.employee_uuid.exists'           => 'The selected employee does not exist.',
             'items.*.gross_amount.required_with'     => 'Gross amount is required.',
             'items.*.deduction_amount.required_with' => 'Deduction amount is required.',
         ];

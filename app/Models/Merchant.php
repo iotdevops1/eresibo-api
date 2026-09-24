@@ -41,7 +41,9 @@ class Merchant extends Model
         return $this->hasMany(
             User::class,
             'merchant_id'
-        );
+        )->whereHas('role', function ($query) {
+            $query->where('code', 'EMPLOYER');
+        });
     }
     
     public function employees()

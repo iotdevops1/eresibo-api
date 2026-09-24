@@ -15,7 +15,7 @@ class UpdateEmployerRequest extends FormRequest
 
     public function rules(): array
     {
-        $employer = $this->route('user');
+        $employerUuid = $this->route('userUuid');
 
         return [
             'name' => [
@@ -29,7 +29,7 @@ class UpdateEmployerRequest extends FormRequest
                 'email',
                 'max:255',
                 Rule::unique('users', 'email')
-                    ->ignore($employer?->id),
+                    ->ignore($employerUuid, 'uuid'),
             ],
 
             'mobile' => [

@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\Employer\PayrollBatchController;
 use App\Http\Controllers\Api\Employer\PayslipController;
 use App\Http\Controllers\Api\Employer\WalletController as EmployerWalletController;
 use App\Http\Controllers\Api\Employee\PayslipAcknowledgementController;
+use App\Http\Controllers\Api\Employee\PayslipController as EmployeePayslipController;
 use App\Http\Controllers\Api\Employee\WalletController;
 
 // Integrations
@@ -142,6 +143,8 @@ Route::prefix('employer')->middleware(['auth:sanctum', 'role:EMPLOYER',])->group
 
 Route::prefix('employee')->middleware(['auth:sanctum', 'role:EMPLOYEE'])->group(function () {
     Route::post('/payslips/{uuid}/acknowledge', [PayslipAcknowledgementController::class, 'store']);
+    Route::get('/payslips', [EmployeePayslipController::class, 'index']);
+    Route::get('/payslips/{uuid}', [EmployeePayslipController::class, 'show']);
     Route::get('/wallet', [WalletController::class, 'show']);
 });
 

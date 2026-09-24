@@ -80,24 +80,24 @@ class PayrollBatchService
             |--------------------------------------------------------------------------
             */
 
-            $employeeIds = collect($data['items'])
-                ->pluck('employee_id')
+            $employeeUuids = collect($data['items'])
+                ->pluck('employee_uuid')
                 ->unique()
                 ->values();
 
             $employees = Employee::query()
                 ->where('merchant_id', $merchantId)
-                ->whereIn('id', $employeeIds)
+                ->whereIn('uuid', $employeeUuids)
                 ->where(
                     'status',
                     Employee::STATUS_ACTIVE
                 )
                 ->get()
-                ->keyBy('id');
+                ->keyBy('uuid');
 
             if (
                 $employees->count()
-                !== $employeeIds->count()
+                !== $employeeUuids->count()
             ) {
                 throw ValidationException::withMessages([
                     'items' => [
@@ -192,7 +192,7 @@ class PayrollBatchService
 
                 $batch->items()->create([
                     'employee_id' =>
-                        $item['employee_id'],
+                        $employees->get($item['employee_uuid'])->id,
 
                     'gross_amount' =>
                         $gross,
@@ -288,8 +288,8 @@ class PayrollBatchService
 
             if (array_key_exists('items', $data)) {
 
-                $employeeIds = collect($data['items'])
-                    ->pluck('employee_id')
+                $employeeUuids = collect($data['items'])
+                    ->pluck('employee_uuid')
                     ->unique()
                     ->values();
 
@@ -299,19 +299,19 @@ class PayrollBatchService
                         $batch->merchant_id
                     )
                     ->whereIn(
-                        'id',
-                        $employeeIds
+                        'uuid',
+                        $employeeUuids
                     )
                     ->where(
                         'status',
                         Employee::STATUS_ACTIVE
                     )
                     ->get()
-                    ->keyBy('id');
+                    ->keyBy('uuid');
 
                 if (
                     $employees->count()
-                    !== $employeeIds->count()
+                    !== $employeeUuids->count()
                 ) {
                     throw ValidationException::withMessages([
                         'items' => [
@@ -347,7 +347,7 @@ class PayrollBatchService
 
                     $batch->items()->create([
                         'employee_id' =>
-                            $item['employee_id'],
+                            $employees->get($item['employee_uuid'])->id,
 
                         'gross_amount' =>
                             $gross,

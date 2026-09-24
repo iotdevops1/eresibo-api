@@ -62,11 +62,11 @@ class StorePayrollBatchRequest extends FormRequest
                 'min:1',
             ],
 
-            'items.*.employee_id' => [
+            'items.*.employee_uuid' => [
                 'required',
-                'integer',
+                'uuid',
                 'distinct',
-                'exists:employees,id',
+                'exists:employees,uuid',
             ],
 
             'items.*.gross_amount' => [
@@ -95,13 +95,13 @@ class StorePayrollBatchRequest extends FormRequest
             'items.min' =>
                 'At least one employee is required.',
 
-            'items.*.employee_id.required' =>
+            'items.*.employee_uuid.required' =>
                 'Employee is required.',
 
-            'items.*.employee_id.distinct' =>
+            'items.*.employee_uuid.distinct' =>
                 'An employee can only appear once in a payroll batch.',
 
-            'items.*.employee_id.exists' =>
+            'items.*.employee_uuid.exists' =>
                 'The selected employee does not exist.',
 
             'items.*.gross_amount.required' =>

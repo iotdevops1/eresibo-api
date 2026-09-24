@@ -156,6 +156,10 @@ class EmployerService
             ])
             ->toArray();
 
+        if (isset($updateData['email'])) {
+            $updateData['email'] = strtolower(trim($updateData['email']));
+        }
+
         if (isset($data['password'])) {
             $updateData['password'] = Hash::make(
                 $data['password']
