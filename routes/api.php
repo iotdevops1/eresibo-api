@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\Admin\ModuleController;
 use App\Http\Controllers\Api\Admin\MerchantController;
 use App\Http\Controllers\Api\Admin\MerchantEmployerController;
 use App\Http\Controllers\Api\Admin\MerchantEmployeeController;
+use App\Http\Controllers\Api\Admin\DocumentVaultController as AdminDocumentVaultController;
 use App\Http\Controllers\Api\Admin\MerchantWalletController;
 
 use App\Http\Controllers\Api\V1\Integration\PusoPayFundingController;
@@ -28,12 +29,14 @@ use App\Http\Controllers\Api\V1\Integration\PusoPayFundingController;
 use App\Http\Controllers\Api\Employer\TeamController;
 use App\Http\Controllers\Api\Employer\PayrollBatchController;
 use App\Http\Controllers\Api\Employer\PayslipController;
+use App\Http\Controllers\Api\Employer\DocumentVaultController as EmployerDocumentVaultController;
 use App\Http\Controllers\Api\Employer\WalletController as EmployerWalletController;
 use App\Http\Controllers\Api\Employer\DisputeController;
 use App\Http\Controllers\Api\Employee\PayslipAcknowledgementController;
 use App\Http\Controllers\Api\Employee\PayslipController as EmployeePayslipController;
 use App\Http\Controllers\Api\Employee\WalletController;
 use App\Http\Controllers\Api\Employee\CaseController;
+use App\Http\Controllers\Api\Employee\DocumentVaultController;
 use App\Http\Controllers\Api\Wallet\TransactionController;
 
 // Integrations
@@ -93,6 +96,9 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,ADMIN',])-
     Route::put('/roles/{uuid}',    [RoleController::class, 'update'])->middleware('permission:roles.update');
     Route::delete('/roles/{uuid}', [RoleController::class, 'destroy'])->middleware('permission:roles.delete');
 
+    Route::get('/documents', [AdminDocumentVaultController::class, 'index'])->middleware('permission:document_vault.view');
+    Route::get('/documents/{uuid}', [AdminDocumentVaultController::class, 'show'])->middleware('permission:document_vault.view');
+    Route::patch('/documents/{uuid}', [AdminDocumentVaultController::class, 'update'])->middleware('permission:document_vault.view');
     // Permission Management
     Route::get('/permissions',              [PermissionController::class, 'index'])->middleware('permission:roles.view');
     Route::put('/roles/{uuid}/permissions', [RoleController::class, 'updatePermissions'])->middleware('permission:roles.update');
@@ -135,6 +141,9 @@ Route::prefix('employer')->middleware(['auth:sanctum', 'role:EMPLOYER',])->group
     /*
     | Payslips
     */
+    Route::get('/documents', [EmployerDocumentVaultController::class, 'index'])->middleware('permission:document_vault.view');
+    Route::get('/documents/{uuid}', [EmployerDocumentVaultController::class, 'show'])->middleware('permission:document_vault.view');
+    Route::patch('/documents/{uuid}', [EmployerDocumentVaultController::class, 'update'])->middleware('permission:document_vault.view');
     Route::post('/payslips', [PayslipController::class, 'store'])->middleware('permission:payslips.create');
     Route::get('/disputes', [DisputeController::class, 'index'])->middleware('permission:disputes.view');
     Route::post('/disputes', [DisputeController::class, 'store'])->middleware('permission:disputes.create');
@@ -161,6 +170,9 @@ Route::prefix('employee')->middleware(['auth:sanctum', 'role:EMPLOYEE'])->group(
     Route::post('/cases', [CaseController::class, 'store']);
     Route::get('/cases/{uuid}', [CaseController::class, 'show']);
     Route::post('/cases/{uuid}/messages', [CaseController::class, 'addMessage']);
+    Route::get('/documents', [DocumentVaultController::class, 'index'])->middleware('permission:document_vault.view');
+    Route::get('/documents/{uuid}', [DocumentVaultController::class, 'show'])->middleware('permission:document_vault.view');
+    Route::patch('/documents/{uuid}', [DocumentVaultController::class, 'update'])->middleware('permission:document_vault.view');
     Route::get('/wallet', [WalletController::class, 'show']);
     Route::get('/transactions', [TransactionController::class, 'employeeIndex']);
     Route::get('/transactions/{uuid}', [TransactionController::class, 'employeeShow']);

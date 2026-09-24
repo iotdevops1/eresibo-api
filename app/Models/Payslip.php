@@ -12,5 +12,6 @@ class Payslip extends Model {
     public function employee(){return $this->belongsTo(Employee::class);}
     public function lines(){return $this->hasMany(PayslipLine::class)->orderBy('sort_order');}
     public function walletTransaction(){return $this->belongsTo(WalletTransaction::class);}
+    public function merchant(){return $this->belongsTo(Merchant::class);}
     public function receipt(){return $this->belongsTo(Receipt::class);}
 }
