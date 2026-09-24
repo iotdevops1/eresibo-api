@@ -130,6 +130,11 @@ class User extends Authenticatable
         return $this->hasOne(Employee::class, 'user_id');
     }
 
+    public function preference()
+    {
+        return $this->hasOne(UserPreference::class);
+    }
+
     public function wallet()
     {
         return $this->morphOne(Wallet::class, 'owner');

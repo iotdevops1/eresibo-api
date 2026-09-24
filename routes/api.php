@@ -11,6 +11,7 @@ use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\ChangePasswordController;
 use App\Http\Controllers\Api\Auth\MeController;
+use App\Http\Controllers\Api\Auth\SettingsController;
 use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\RoleController;
@@ -61,6 +62,10 @@ Route::prefix('auth')->group(function () {
         Route::get('/me',      MeController::class);
         Route::post('/logout', LogoutController::class);
         Route::get('/sidebar', [ModuleController::class, 'sidebar'])->middleware('permission:sidebar.view');
+        Route::get('/settings/profile', [SettingsController::class, 'profile'])->middleware('permission:settings.view');
+        Route::patch('/settings/profile', [SettingsController::class, 'updateProfile'])->middleware('permission:settings.update');
+        Route::get('/settings/receipt-preferences', [SettingsController::class, 'receiptPreferences'])->middleware('permission:settings.view');
+        Route::patch('/settings/receipt-preferences', [SettingsController::class, 'updateReceiptPreferences'])->middleware('permission:settings.update');
         Route::post('/change-password', ChangePasswordController::class);
         Route::post('/users/{userUuid}/temporary-password', [UserController::class, 'generateTemporaryPassword']);
     }); 
