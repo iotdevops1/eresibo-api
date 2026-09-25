@@ -5,14 +5,17 @@ namespace App\Services\Employee;
 use App\Models\Employee;
 use App\Models\UserRole;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Repositories\Employee\EmployeeRepository;
+use App\Repositories\Wallet\WalletRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class EmployeeService
 {
     public function __construct(
-        protected EmployeeRepository $employeeRepository
+        protected EmployeeRepository $employeeRepository,
+        protected WalletRepository $walletRepository,
     ) {
     }
 
@@ -108,7 +111,7 @@ class EmployeeService
             |--------------------------------------------------------------------------
             */
 
-            return $this->employeeRepository->create([
+            $employee = $this->employeeRepository->create([
                 'merchant_id' => $merchantId,
 
                 /*
@@ -138,6 +141,16 @@ class EmployeeService
 
                 'hired_at' => $data['hired_at'] ?? null,
             ]);
+
+            $this->walletRepository->firstOrCreateUserWallet(
+                $employeeUser->id,
+                'Employee wallet - '.$employee->employee_no,
+                $employee->status === Employee::STATUS_ACTIVE
+                    ? Wallet::STATUS_ACTIVE
+                    : Wallet::STATUS_INACTIVE,
+            );
+
+            return $employee;
         });
     }
 
