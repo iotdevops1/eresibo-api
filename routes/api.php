@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\V1\Integration\PusoPayReceiptController;
 use App\Http\Controllers\Api\V1\Internal\ReceiptLookupController;
+use App\Http\Controllers\Api\V1\Public\VerifyDocumentController;
 use App\Http\Controllers\ReceiptController;
 
 
@@ -44,6 +45,10 @@ use App\Http\Controllers\Api\Employee\WalletController;
 use App\Http\Controllers\Api\Employee\CaseController;
 use App\Http\Controllers\Api\Employee\DocumentVaultController;
 use App\Http\Controllers\Api\Wallet\TransactionController;
+
+// Public document verification (no login or integration key required).
+Route::get('/v1/public/documents/verify', VerifyDocumentController::class)
+    ->middleware('throttle:60,1');
 
 // Integrations
 Route::prefix('v1/integrations/pusopay')->group(function () {
