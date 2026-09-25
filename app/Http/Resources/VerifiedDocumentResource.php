@@ -14,7 +14,7 @@ class VerifiedDocumentResource extends JsonResource
         if ($this->resource instanceof Payslip) {
             return [
                 'document_type' => 'Payslip',
-                'reference' => 'PAYSLIP-'.$this->uuid,
+                'reference' => $this->reference,
                 'source_system' => 'ERESIBO',
                 'issuer' => $this->merchant?->business_name,
                 'status' => $this->status === Payslip::STATUS_ACKNOWLEDGED ? 'Acknowledged' : 'Pending acknowledgement',

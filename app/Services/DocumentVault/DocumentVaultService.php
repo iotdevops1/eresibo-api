@@ -41,7 +41,7 @@ class DocumentVaultService {
         Payslip::query()->with(['receipt','merchant'])->orderBy('id')->each(fn(Payslip $payslip)=>$this->syncPayslip($user,$payslip));
     }
     private function syncPayslip(User $user,Payslip $payslip):void {
-        $data=['merchant_id'=>$payslip->merchant_id,'title'=>'Payslip - '.$payslip->pay_date?->format('M d, Y'),'reference'=>'PAYSLIP-'.$payslip->uuid,'document_date'=>$payslip->pay_date];
+        $data=['merchant_id'=>$payslip->merchant_id,'title'=>'Payslip - '.$payslip->pay_date?->format('M d, Y'),'reference'=>$payslip->reference,'document_date'=>$payslip->pay_date];
         $this->documentVaultRepository->firstOrCreateForSource($user->id,DocumentVaultDocument::TYPE_PAYSLIP,$payslip->uuid,$data);
         if($payslip->receipt)$this->documentVaultRepository->firstOrCreateForSource($user->id,DocumentVaultDocument::TYPE_RECEIPT,$payslip->receipt->uuid,['merchant_id'=>$payslip->merchant_id,'title'=>'Salary disbursement receipt','reference'=>$payslip->receipt->external_reference,'document_date'=>$payslip->receipt->occurred_at]);
     }

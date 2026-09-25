@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Http\Resources\PayslipResource;
+use App\Models\Employee;
+use App\Models\Payslip;
 use App\Models\Receipt;
+use App\Services\Payslip\PayslipService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -78,7 +82,7 @@ class PublicDocumentVerificationTest extends TestCase
         $this->getJson($url)->assertNotFound();
     }
 
-    public function test_payslip_reference_reports_status_without_private_payroll_fields(): void
+    private function payslip(): Payslip
     {
         DB::table('merchants')->insert(['id' => 1, 'business_name' => 'Test Merchant']);
         $uuid = 'c3cabfd5-be33-4558-8e6b-b2a730e11a71';
@@ -89,6 +93,14 @@ class PublicDocumentVerificationTest extends TestCase
             'gross_amount_major_units' => 150, 'net_amount_major_units' => 150,
             'status' => 1, 'created_at' => now(), 'updated_at' => now(),
         ]);
+
+        return Payslip::where('uuid', $uuid)->firstOrFail();
+    }
+
+    public function test_payslip_reference_reports_status_without_private_payroll_fields(): void
+    {
+        $payslip = $this->payslip();
+        $uuid = $payslip->uuid;
         $url = self::URL.'?document=PAYSLIP-'.$uuid;
         $response = $this->getJson($url)->assertOk()->assertJsonPath('data.status', 'Pending acknowledgement');
         $this->assertEqualsCanonicalizing([
@@ -100,11 +112,111 @@ class PublicDocumentVerificationTest extends TestCase
         DB::table('payslips')->update(['status' => 2, 'acknowledged_at' => now()]);
         $this->getJson($url)->assertOk()->assertJsonPath('data.status', 'Acknowledged')
             ->assertJsonPath('data.amount_minor', 15000);
+        $this->getJson(self::URL.'?document='.$uuid)->assertOk()
+            ->assertJsonPath('data.status', 'Acknowledged')->assertJsonPath('data.reference', $payslip->reference);
         $this->getJson(self::URL.'?document=payslip-'.strtoupper($uuid))->assertOk();
         foreach ([0, 3, 4] as $status) {
             DB::table('payslips')->update(['status' => $status]);
             $this->getJson($url)->assertNotFound()->assertJsonPath('data', null);
+            $this->getJson(self::URL.'?document='.$uuid)->assertNotFound()->assertJsonPath('data', null);
         }
+    }
+
+    public function test_pending_payslip_is_searchable_by_reference_and_legacy_uuid_without_any_writes(): void
+    {
+        $payslip = $this->payslip();
+        $before = $payslip->getRawOriginal();
+        DB::enableQueryLog();
+
+        foreach ([$payslip->reference, $payslip->uuid, ' '.strtoupper($payslip->uuid).' '] as $reference) {
+            $this->getJson(self::URL.'?'.http_build_query(['document' => $reference]))
+                ->assertOk()->assertJsonPath('state', 'verified')
+                ->assertJsonPath('data.document_type', 'Payslip')
+                ->assertJsonPath('data.reference', $payslip->reference)
+                ->assertJsonPath('data.status', 'Pending acknowledgement')
+                ->assertJsonPath('data.acknowledged_at', null);
+        }
+
+        $queries = DB::getQueryLog();
+        DB::disableQueryLog();
+        foreach ($queries as $query) {
+            $this->assertMatchesRegularExpression('/^select\b/i', $query['query']);
+        }
+        $this->assertSame($before, $payslip->refresh()->getRawOriginal());
+        $this->assertDatabaseCount('receipts', 0);
+        $this->assertNull($payslip->wallet_transaction_id);
+
+        $this->postJson(self::URL, ['document' => $payslip->reference])->assertStatus(405);
+        $this->postJson('/api/employee/payslips/'.$payslip->uuid.'/acknowledge')->assertUnauthorized();
+    }
+
+    public function test_payslip_creation_response_has_a_stable_reference_before_a_receipt_exists(): void
+    {
+        config(['eresibo.portal_url' => 'https://portal.example.test/']);
+        DB::table('merchants')->insert(['id' => 1, 'business_name' => 'Test Merchant']);
+        Schema::create('employees', function (Blueprint $table) {
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('merchant_id');
+            $table->unsignedBigInteger('user_id');
+            $table->string('employee_no');
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->unsignedTinyInteger('status');
+            $table->timestamps();
+            $table->softDeletes();
+        });
+        Employee::create([
+            'merchant_id' => 1, 'user_id' => 8, 'employee_no' => 'EMP-1',
+            'first_name' => 'Test', 'last_name' => 'Employee', 'status' => Employee::STATUS_ACTIVE,
+        ]);
+        $payslip = app(PayslipService::class)->create(1, 9, [
+            'employee_no' => 'EMP-1', 'pay_period_start' => '2026-09-01',
+            'pay_period_end' => '2026-09-15', 'pay_date' => '2026-09-17',
+            'earnings' => [['description' => 'Basic pay', 'amount_minor_units' => 15000]],
+            'deductions' => [],
+        ]);
+        $pending = (new PayslipResource($payslip))->resolve();
+
+        $this->assertSame('PAYSLIP-'.$payslip->uuid, $pending['reference']);
+        $this->assertSame('https://portal.example.test/verify?document='.$pending['reference'], $pending['verification_url']);
+        $this->assertSame('PENDING_ACKNOWLEDGEMENT', $pending['status']);
+        $this->assertNull($pending['receipt']);
+        $this->assertNull($pending['payout']['wallet_transaction_uuid']);
+        $this->getJson(self::URL.'?document='.$pending['reference'])->assertOk()
+            ->assertJsonPath('data.reference', $pending['reference']);
+
+        // Reference does not depend on receipt generation or acknowledgement state.
+        $payslip->status = Payslip::STATUS_ACKNOWLEDGED;
+        $payslip->acknowledged_at = now();
+        $acknowledged = (new PayslipResource($payslip))->resolve();
+        $this->assertSame($pending['reference'], $acknowledged['reference']);
+        $this->assertSame($pending['verification_url'], $acknowledged['verification_url']);
+    }
+
+    public function test_ambiguous_plain_uuid_is_rejected_but_prefixed_payslip_remains_verifiable(): void
+    {
+        $payslip = $this->payslip();
+        $receipt = $this->receipt(['external_reference' => $payslip->uuid]);
+
+        $this->getJson(self::URL.'?document='.$payslip->uuid)->assertNotFound()->assertJsonPath('data', null);
+        $this->getJson(self::URL.'?document='.$payslip->reference)->assertOk()->assertJsonPath('data.document_type', 'Payslip');
+
+        $receipt->update(['external_reference' => 'ANOTHER-REFERENCE', 'uuid' => $payslip->uuid]);
+        $this->getJson(self::URL.'?document='.$payslip->uuid)->assertNotFound()->assertJsonPath('data', null);
+        $this->getJson(self::URL.'?document='.$payslip->reference)->assertOk()->assertJsonPath('data.document_type', 'Payslip');
+    }
+
+    public function test_expired_receipt_does_not_hide_the_independent_payslip_reference(): void
+    {
+        $payslip = $this->payslip();
+        $receipt = $this->receipt(['external_reference' => $payslip->reference, 'expires_at' => now()->subDay()]);
+
+        $this->getJson(self::URL.'?document='.$receipt->uuid)->assertStatus(410);
+        $this->getJson(self::URL.'?document='.$payslip->reference)->assertOk()
+            ->assertJsonPath('data.status', 'Pending acknowledgement');
+        $this->getJson(self::URL.'?document='.$payslip->uuid)->assertOk()
+            ->assertJsonPath('data.reference', $payslip->reference);
     }
 
     public function test_missing_and_invalid_references_do_not_verify(): void

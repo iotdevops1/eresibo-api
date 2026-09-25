@@ -6,7 +6,7 @@ No login or integration API key is needed to verify an existing registered docum
 
 GET /verify?document=PAYSLIP-<payslip-uuid>
 
-The same form accepts receipt UUIDs, public receipt tokens, and exact integration external references. URL-encode the reference when constructing links (including +, &, /, # and spaces).
+The same form accepts payslip UUIDs (for older documents), receipt UUIDs, public receipt tokens, and exact integration external references. URL-encode the reference when constructing links (including +, &, /, # and spaces).
 
 Example:
 
@@ -40,7 +40,26 @@ curl --get "https://YOUR_API_HOST/api/v1/public/documents/verify" \
   --data-urlencode "document=PAYSLIP-c3cabfd5-be33-4558-8e6b-b2a730e11a71"
 ```
 
-Supported identifiers are `PAYSLIP-<uuid>`, a receipt UUID, a receipt public token, or an exact receipt external reference. A bare payslip UUID is not supported. Verification is read-only: it does not acknowledge a payslip, credit a wallet, or create a receipt.
+Supported identifiers are `PAYSLIP-<uuid>`, a bare payslip UUID, a receipt UUID, a receipt public token, or an exact receipt external reference. Unprefixed identifiers matching multiple documents are rejected; use the canonical `PAYSLIP-<uuid>` reference to identify a payslip explicitly. Verification is read-only: it does not acknowledge a payslip, credit a wallet, or create a receipt.
+
+## Consistent payslip references
+
+Payslip creation, list, detail, and acknowledgement responses include top-level `reference` and `verification_url` fields, even when `receipt` is null:
+
+```json
+{
+  "uuid": "c3cabfd5-be33-4558-8e6b-b2a730e11a71",
+  "reference": "PAYSLIP-c3cabfd5-be33-4558-8e6b-b2a730e11a71",
+  "verification_url": "https://YOUR_PORTAL_HOST/verify?document=PAYSLIP-c3cabfd5-be33-4558-8e6b-b2a730e11a71",
+  "status": "PENDING_ACKNOWLEDGEMENT",
+  "receipt": null,
+  "acknowledged_at": null
+}
+```
+
+This is an excerpt of the payslip `data` object. Use `reference` as the displayed payslip number and `verification_url` for the public read-only link. The reference is derived from the existing UUID, matches Document Vault references, and does not change after acknowledgement. No reference backfill or schema migration is needed for old payslips. The separate receipt link still refers to the payment receipt generated after acknowledgement.
+
+Set `ERESIBO_PORTAL_URL` to the correct portal origin for each deployment; it is used for the API's verification URL. Deploy the updated portal payslip display and API together. The portal also derives the canonical reference from `uuid` when talking to an older API.
 
 ## Response format
 
