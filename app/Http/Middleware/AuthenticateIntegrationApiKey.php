@@ -11,7 +11,8 @@ class AuthenticateIntegrationApiKey
 {
     public function handle(
         Request $request,
-        Closure $next
+        Closure $next,
+        ?string $scope = null
     ): Response {
         $apiKey = $request->header('X-API-Key');
 
@@ -37,6 +38,14 @@ class AuthenticateIntegrationApiKey
                 'success' => false,
                 'message' => 'Invalid or expired API key.',
             ], 401);
+        }
+
+        if ($scope !== null && ! $integrationKey->hasScope($scope)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'API key does not have the required scope.',
+                'requiredScope' => $scope,
+            ], 403);
         }
 
         $integrationKey->forceFill([

@@ -46,11 +46,14 @@ use App\Http\Controllers\Api\Employee\DocumentVaultController;
 use App\Http\Controllers\Api\Wallet\TransactionController;
 
 // Integrations
-Route::prefix('v1/integrations/pusopay')->middleware('integration.api_key')->group(function () {
-    Route::post('/receipts', [PusoPayReceiptController::class, 'store']);
+Route::prefix('v1/integrations/pusopay')->group(function () {
+    Route::post('/receipts', [PusoPayReceiptController::class, 'store'])
+        ->middleware('integration.api_key:receipts.create');
+    Route::get('/receipts', [PusoPayReceiptController::class, 'lookup'])
+        ->middleware('integration.api_key:receipts.read');
 });
 
-Route::middleware('integration.api_key')->prefix('v1/integrations/pusopay')->group(function () {
+Route::middleware('integration.api_key:funding.confirm')->prefix('v1/integrations/pusopay')->group(function () {
     Route::post('/fundings/confirm', [PusoPayFundingController::class, 'confirm']);
 });
 

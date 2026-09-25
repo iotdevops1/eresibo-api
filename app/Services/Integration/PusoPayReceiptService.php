@@ -8,6 +8,19 @@ use Illuminate\Support\Facades\DB;
 
 class PusoPayReceiptService
 {
+    public function lookup(array $filters): Receipt
+    {
+        $query = Receipt::query()->where('source_system', 'PUSOPAY');
+
+        if (isset($filters['receiptId'])) {
+            $query->where('uuid', $filters['receiptId']);
+        } else {
+            $query->where('external_reference', $filters['externalReference']);
+        }
+
+        return $query->firstOrFail();
+    }
+
     public function createOrGet(array $data): Receipt
     {
         return DB::transaction(function () use ($data) {
@@ -47,43 +60,32 @@ class PusoPayReceiptService
             */
 
             $receipt = Receipt::create([
-                'source_system' =>
-                    'PUSOPAY',
+                'source_system' => 'PUSOPAY',
 
-                'external_reference' =>
-                    $data['externalReference'],
+                'external_reference' => $data['externalReference'],
 
-                'amount_minor' =>
-                    $data['amountMinor'],
+                'amount_minor' => $data['amountMinor'],
 
-                'currency' =>
-                    strtoupper($data['currency']),
+                'currency' => strtoupper($data['currency']),
 
-                'transaction_type' =>
-                    $data['transactionType'],
+                'transaction_type' => $data['transactionType'],
 
-                'counterparty_label' =>
-                    $data['counterpartyLabel'] ?? null,
+                'counterparty_label' => $data['counterpartyLabel'] ?? null,
 
-                'occurred_at' =>
-                    $data['occurredAt'],
+                'occurred_at' => $data['occurredAt'],
 
-                'public_token' =>
-                    $publicToken,
+                'public_token' => $publicToken,
 
-                'expires_at' =>
-                    now()->addDays(
-                        config(
-                            'eresibo.receipt_expiry_days',
-                            90
-                        )
-                    ),
+                'expires_at' => now()->addDays(
+                    config(
+                        'eresibo.receipt_expiry_days',
+                        90
+                    )
+                ),
 
-                'status' =>
-                    Receipt::STATUS_CONFIRMED,
+                'status' => Receipt::STATUS_CONFIRMED,
 
-                'processed_at' =>
-                    now(),
+                'processed_at' => now(),
             ]);
 
             /*

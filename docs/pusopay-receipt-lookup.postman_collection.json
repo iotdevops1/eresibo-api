@@ -1,0 +1,116 @@
+{
+  "info": {
+    "name": "eResibo — PusoPay Receipt Lookup",
+    "description": "Client lookup examples. Set baseUrl and apiKey locally, then use an existing receipt identifier. GET only; no receipt creation or fund movement. Required scope: receipts.read.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "",
+      "type": "string",
+      "description": "Environment base URL without a trailing slash or /api."
+    },
+    {
+      "key": "apiKey",
+      "value": "",
+      "type": "string",
+      "description": "Set locally. Never share this value. Required scope: receipts.read."
+    },
+    {
+      "key": "externalReference",
+      "value": "",
+      "type": "string",
+      "description": "Original externalReference sent to receipt creation."
+    },
+    {
+      "key": "receiptId",
+      "value": "",
+      "type": "string",
+      "description": "Receipt UUID, not the integration-key UUID."
+    }
+  ],
+  "item": [
+    {
+      "name": "Lookup by external reference",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/integrations/pusopay/receipts?externalReference={{externalReference}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "integrations",
+            "pusopay",
+            "receipts"
+          ],
+          "query": [
+            {
+              "key": "externalReference",
+              "value": "{{externalReference}}"
+            }
+          ]
+        },
+        "description": "Recover a receipt using the reference originally supplied by PusoPay. Supply exactly one lookup parameter. Expired receipts remain retrievable but links are not renewed."
+      },
+      "response": []
+    },
+    {
+      "name": "Lookup by receipt ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/integrations/pusopay/receipts?receiptId={{receiptId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "integrations",
+            "pusopay",
+            "receipts"
+          ],
+          "query": [
+            {
+              "key": "receiptId",
+              "value": "{{receiptId}}"
+            }
+          ]
+        },
+        "description": "Retrieve an existing receipt using data.receiptId from eResibo. Supply exactly one lookup parameter. Expired receipts remain retrievable but links are not renewed."
+      },
+      "response": []
+    }
+  ]
+}

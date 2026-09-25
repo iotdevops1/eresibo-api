@@ -1,14 +1,19 @@
 <?php
 
+use App\Http\Middleware\AuthenticateIntegrationApiKey;
+use App\Http\Middleware\AuthenticateInternalPortal;
+use App\Http\Middleware\CheckPermission;
+use App\Http\Middleware\CheckRole;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Illuminate\Auth\AuthenticationException;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -28,11 +33,11 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $middleware->alias([
-            'role'                => \App\Http\Middleware\CheckRole::class,
-            'permission'          => \App\Http\Middleware\CheckPermission::class,
-            'integration.api_key' => \App\Http\Middleware\AuthenticateIntegrationApiKey::class,
-            'internal.portal'     => \App\Http\Middleware\AuthenticateInternalPortal::class,
-            'internal.api'        => \App\Http\Middleware\AuthenticateInternalPortal::class,
+            'role' => CheckRole::class,
+            'permission' => CheckPermission::class,
+            'integration.api_key' => AuthenticateIntegrationApiKey::class,
+            'internal.portal' => AuthenticateInternalPortal::class,
+            'internal.api' => AuthenticateInternalPortal::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -41,7 +46,6 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*'),
         );
 
-        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
         $exceptions->render(function (ValidationException $e, Request $request) {
             if (! $request->is('api/*')) {
                 return null;
@@ -73,9 +77,10 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage() ?: 'Forbidden.',
-            ], 403);
+            ], $e->status() ?? 403);
         });
 
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
             if (! $request->is('api/*')) {
                 return null;
             }
@@ -104,6 +109,13 @@ return Application::configure(basePath: dirname(__DIR__))
 
             if (! $request->is('api/*')) {
                 return null;
+            }
+
+            if ($e instanceof HttpExceptionInterface) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage() ?: 'Request failed.',
+                ], $e->getStatusCode(), $e->getHeaders());
             }
 
             return response()->json([

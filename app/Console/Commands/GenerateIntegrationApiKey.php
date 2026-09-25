@@ -6,15 +6,13 @@ use App\Models\IntegrationApiKey;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
-#[Signature('app:generate-integration-api-key')]
-#[Description('Command description')]
-
 class GenerateIntegrationApiKey extends Command
 {
     protected $signature = 'integration:generate-api-key
                             {name : Name of the integration key}
                             {--environment=sandbox : sandbox or production}
-                            {--days=365 : Number of days before expiry}';
+                            {--days=365 : Number of days before expiry}
+                            {--scope=* : Allowed scope; repeat for each permission}';
 
     protected $description = 'Generate an integration API key';
 
@@ -25,6 +23,14 @@ class GenerateIntegrationApiKey extends Command
         $environment = $this->option('environment');
 
         $days = (int) $this->option('days');
+
+        $scopes = array_values(array_unique($this->option('scope')));
+
+        if ($scopes === [] || array_diff($scopes, IntegrationApiKey::SCOPES)) {
+            $this->error('Specify --scope using: '.implode(', ', IntegrationApiKey::SCOPES));
+
+            return self::FAILURE;
+        }
 
         if (! in_array($environment, [
             'sandbox',
@@ -48,11 +54,9 @@ class GenerateIntegrationApiKey extends Command
         );
 
         $apiKey = match ($environment) {
-            'sandbox' =>
-                'ersb_sbx_' . $secret,
+            'sandbox' => 'ersb_sbx_'.$secret,
 
-            'production' =>
-                'ersb_prod_' . $secret,
+            'production' => 'ersb_prod_'.$secret,
         };
 
         /*
@@ -72,6 +76,7 @@ class GenerateIntegrationApiKey extends Command
             ),
 
             'environment' => $environment,
+            'scopes' => $scopes,
 
             'active' => true,
 
@@ -87,15 +92,18 @@ class GenerateIntegrationApiKey extends Command
         $this->newLine();
 
         $this->line(
-            'Name: ' . $record->name
+            'Name: '.$record->name
+        );
+
+        $this->line('Key UUID: '.$record->uuid);
+        $this->line('Scopes: '.implode(', ', $record->scopes));
+
+        $this->line(
+            'Environment: '.$record->environment
         );
 
         $this->line(
-            'Environment: ' . $record->environment
-        );
-
-        $this->line(
-            'Expires: ' . $record->expires_at?->toISOString()
+            'Expires: '.$record->expires_at?->toISOString()
         );
 
         $this->newLine();
