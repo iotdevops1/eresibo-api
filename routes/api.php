@@ -93,7 +93,9 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN,ADMIN',])-
     Route::patch('/merchants/{merchantUuid}/employers/{userUuid}', [MerchantEmployerController::class, 'update'])->middleware('permission:management.update');
     Route::delete('/merchants/{merchantUuid}/employers/{userUuid}',[MerchantEmployerController::class, 'destroy'])->middleware('permission:management.delete');
 
-    Route::get('/merchants/{merchantUuid}/employees', [MerchantEmployeeController::class, 'index'])->middleware('permission:merchants.view');
+    Route::get('/merchants/{merchantUuid}/employees', [MerchantEmployeeController::class, 'index'])->middleware('permission:management.view');
+    Route::post('/merchants/{merchantUuid}/employees', [MerchantEmployeeController::class, 'store'])->middleware('permission:management.create');
+    Route::put('/merchants/{merchantUuid}/employees/{uuid}', [MerchantEmployeeController::class, 'update'])->middleware('permission:management.update');
 
     // User Management
     Route::get('/users',                [UserController::class, 'index'])->middleware('permission:users.view');
